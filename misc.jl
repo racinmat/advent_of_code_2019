@@ -18,3 +18,8 @@ function read_input(day::Int)
 	misc = pyimport("misc")
 	misc.read_day(day)
 end
+
+function submit(answer, day::Int, part::Int)
+	misc = pyimport("misc")
+	misc.submit_day(answer, day, part)
+end

@@ -1,5 +1,5 @@
 import yaml
-from aocd import get_data
+from aocd import get_data, submit
 
 with open('secret.yaml', 'r') as f:
     token = yaml.load(f)['session']
@@ -13,3 +13,8 @@ def read_day(i: int):
         with open(f'day_{i}/input.txt', 'w', encoding='utf-8') as f:
             f.write(in_data)
     return in_data
+
+
+def submit_day(answer, i: int, part: int):
+    parts = {1: 'a', 2: 'b'}
+    return submit(answer, part=parts[part], day=i, year=2019, session=token)
