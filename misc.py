@@ -2,7 +2,7 @@ import yaml
 from aocd import get_data, submit
 
 with open('secret.yaml', 'r') as f:
-    token = yaml.load(f)['session']
+    token = yaml.safe_load(f)['session']
 
 
 def read_day(i: int):
