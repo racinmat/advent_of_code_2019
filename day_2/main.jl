@@ -40,7 +40,11 @@ function part2()
     end
 end
 
+using BenchmarkTools
+
 println(part1())
+@btime part1()
 #submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)
