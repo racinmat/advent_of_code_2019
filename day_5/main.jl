@@ -4,7 +4,7 @@ include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
 data = cur_day |> read_input |> x->read_numbers(x, ',')
-data = cur_day |> test_input |> x->read_numbers(x, ',')
+# data = cur_day |> test_input |> x->read_numbers(x, ',')
 
 function parse_inst(inst)
     nums = inst |> digits |> reverse
@@ -24,7 +24,6 @@ function parse_inst(inst)
     end
     instruction, mode1, mode2, mode3
 end
-
 
 function run_program(arr, in_var)
     out_var = 0
@@ -50,13 +49,14 @@ function run_program(arr, in_var)
             arr[arr[i+1]+1] = in_var
             jump = i+2
         elseif inst == 4
-            out_var = arr[arr[i+1]+1]
+            operand1 = op(arr, i+1, m1)
+            out_var = operand1
             jump = i+2
         elseif inst == 5
             operand1 = op(arr, i+1, m1)
             operand2 = op(arr, i+2, m2)
             if operand1 != 0
-                jump = operand2
+                jump = operand2+1
             else
                 jump = i+3
             end
@@ -64,7 +64,7 @@ function run_program(arr, in_var)
             operand1 = op(arr, i+1, m1)
             operand2 = op(arr, i+2, m2)
             if operand1 == 0
-                jump = operand2
+                jump = operand2+1
             else
                 jump = i+3
             end
@@ -79,7 +79,7 @@ function run_program(arr, in_var)
             arr[arr[i+3]+1] = operand1 == operand2 ? 1 : 0
             jump = i+4
         else
-            throw("fuck it")
+            throw("unknown instruction: $inst on step $i")
         end
         i = jump
         # println(arr)
@@ -88,13 +88,11 @@ function run_program(arr, in_var)
 end
 
 function part1()
-    arr = copy(data)
-    run_program(arr, 1)
+    run_program(copy(data), 1)
 end
 
 function part2()
-    arr = copy(data)
-    run_program(arr, 8)
+    run_program(copy(data), 5)
 end
 
 using BenchmarkTools
@@ -104,4 +102,29 @@ println(part1())
 #submit(part1(), cur_day, 1)
 println(part2())
 @btime part2()
-# submit(part2(), cur_day, 2)
+submit(part2(), cur_day, 2)
+
+run_program("3,9,8,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 7) == 0
+run_program("3,9,8,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 8) == 1
+run_program("3,9,8,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 9) == 0
+run_program("3,9,7,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 7) == 1
+run_program("3,9,7,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 8) == 0
+run_program("3,9,7,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 9) == 0
+run_program("3,3,1108,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 7) == 0
+run_program("3,3,1108,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 8) == 1
+run_program("3,3,1108,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 9) == 0
+run_program("3,3,1107,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 7) == 1
+run_program("3,3,1107,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 8) == 0
+run_program("3,3,1107,-1,8,3,4,3,99" |> x->read_numbers(x, ','), 9) == 0
+
+run_program("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9" |> x->read_numbers(x, ','), -1) == 1
+run_program("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9" |> x->read_numbers(x, ','), 0) == 0
+run_program("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9" |> x->read_numbers(x, ','), 1) == 1
+
+run_program("3,3,1105,-1,9,1101,0,0,12,4,12,99,1" |> x->read_numbers(x, ','), -1) == 1
+run_program("3,3,1105,-1,9,1101,0,0,12,4,12,99,1" |> x->read_numbers(x, ','), 0) == 0
+run_program("3,3,1105,-1,9,1101,0,0,12,4,12,99,1" |> x->read_numbers(x, ','), 1) == 1
+
+run_program("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99" |> x->read_numbers(x, ','), 7) == 999
+run_program("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99" |> x->read_numbers(x, ','), 8) == 1000
+run_program("3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99" |> x->read_numbers(x, ','), 9) == 1001
