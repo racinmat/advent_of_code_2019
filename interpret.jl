@@ -18,68 +18,83 @@ function parse_inst(inst)
     instruction, mode1, mode2, mode3
 end
 
+function op(arr, j, m, rel_base)
+    if m == 2
+        return arr[arr[j]+1+rel_base]
+    elseif m == 1
+        return arr[j]
+    else
+        return arr[arr[j]+1]
+    end
+end
+
+function op_idx(arr, j, m, rel_base)
+    if m == 2
+        return arr[j]+1+rel_base
+    elseif m == 1
+        throw("error in assignment mode")
+    else
+        return arr[j]+1
+    end
+end
 
 function run_program!(arr, in_channel::Channel, out_channel::Channel)
     i = 1
     jump = 4
-    rel_base = 0
+    rel_base::Int = 0
     arr = cat(arr, zeros(Int, 1000), dims=1)
     while arr[i] != 99
         inst, m1, m2, m3 = parse_inst(arr[i])
-        function op(arr, j, m)
-            if m == 2
-                return arr[arr[j]+1+rel_base]
-            elseif m == 1
-                return arr[j]
-            else
-                return arr[arr[j]+1]
-            end
-        end
         if inst == 1
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
-            arr[arr[i+3]+1] = operand1 + operand2
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
+            operand3 = op_idx(arr, i+3, m3, rel_base)
+            arr[operand3] = operand1 + operand2
             jump = i+4
         elseif inst == 2
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
-            arr[arr[i+3]+1] = operand1 * operand2
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
+            operand3 = op_idx(arr, i+3, m3, rel_base)
+            arr[operand3] = operand1 * operand2
             jump = i+4
         elseif inst == 3
-            arr[arr[i+1]+1] = take!(in_channel)
+            operand3 = op_idx(arr, i+1, m1, rel_base)
+            arr[operand3] = take!(in_channel)
             jump = i+2
         elseif inst == 4
-            operand1 = op(arr, i+1, m1)
+            operand1 = op(arr, i+1, m1, rel_base)
             put!(out_channel, operand1)
             jump = i+2
         elseif inst == 5
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
             if operand1 != 0
                 jump = operand2+1
             else
                 jump = i+3
             end
         elseif inst == 6
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
             if operand1 == 0
                 jump = operand2+1
             else
                 jump = i+3
             end
         elseif inst == 7
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
-            arr[arr[i+3]+1] = operand1 < operand2 ? 1 : 0
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
+            operand3 = op_idx(arr, i+3, m3, rel_base)
+            arr[operand3] = operand1 < operand2 ? 1 : 0
             jump = i+4
         elseif inst == 8
-            operand1 = op(arr, i+1, m1)
-            operand2 = op(arr, i+2, m2)
-            arr[arr[i+3]+1] = operand1 == operand2 ? 1 : 0
+            operand1 = op(arr, i+1, m1, rel_base)
+            operand2 = op(arr, i+2, m2, rel_base)
+            operand3 = op_idx(arr, i+3, m3, rel_base)
+            arr[operand3] = operand1 == operand2 ? 1 : 0
             jump = i+4
         elseif inst == 9
-            operand1 = op(arr, i+1, m1)
+            operand1 = op(arr, i+1, m1, rel_base)
             rel_base += operand1
             jump = i+2
         else
@@ -95,11 +110,7 @@ function run_program!(arr, input_val::Int)
     channel_out = Channel(Inf)
     put!(channel_in, input_val)
     arr = run_program!(arr, channel_in, channel_out)
-    val = take!(channel_out)
-    while val == 0
-        val = take!(channel_out)
-    end
-    val
+    arr
 end
 
 function run_program_last_out!(arr, input_val::Int)

@@ -8,11 +8,10 @@ data = cur_day |> read_input |> x->read_numbers(x, ',')
 
 function part1()
     run_program_last_out!(copy(data), 1)
-    run_program_all_out!(copy(data), 1)
 end
 
 function part2()
-    data
+    run_program_last_out!(copy(data), 2)
 end
 
 println(part1())
