@@ -4,12 +4,12 @@ using BenchmarkTools
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = read_input(cur_day)
+data = cur_day |> read_input |> x->read_numbers(x, '\n')
 
 add_fuel(mass::Int)::Int = mass ÷ 3 - 2
 
 function part1()
-    split(data, "\n") .|> (x->parse(Int, x) |> add_fuel) |> sum
+    data .|> add_fuel |> sum
 end
 
 function add_fuel_till_0(mass::Int)::Int
@@ -23,7 +23,7 @@ function add_fuel_till_0(mass::Int)::Int
 end
 
 function part2()
-    split(data, "\n") .|> (x->parse(Int, x) |> add_fuel_till_0) |> sum
+    data .|> add_fuel_till_0 |> sum
 end
 
 println(part1())

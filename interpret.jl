@@ -1,5 +1,5 @@
 
-function parse_inst(inst)
+function parse_inst(inst::Int)::Tuple{Int, Int, Int, Int}
     nums = inst |> digits |> reverse
     instruction = inst % 100
     if length(nums) == 1
@@ -7,44 +7,44 @@ function parse_inst(inst)
     elseif length(nums) == 2
         mode3 = mode2 = mode1 = 0
     elseif length(nums) == 3
-        mode1 = nums[1]
+        @inbounds mode1 = nums[1]
         mode3 = mode2 = 0
     elseif length(nums) == 4
-        mode2, mode1 = nums[1:end-2]
+        @inbounds mode2, mode1 = nums[1:end-2]
         mode3 = 0
     elseif length(nums) > 4
-        mode3, mode2, mode1 = nums[1:end-2]
+        @inbounds mode3, mode2, mode1 = nums[1:end-2]
     end
     instruction, mode1, mode2, mode3
 end
 
-function op(arr, j, m, rel_base)
+function op(arr::Vector{Int}, j::Int, m::Int, rel_base::Int)::Int
     if m == 2
-        return arr[arr[j]+1+rel_base]
+        return @inbounds arr[arr[j]+1+rel_base]
     elseif m == 1
-        return arr[j]
+        return @inbounds arr[j]
     else
-        return arr[arr[j]+1]
+        return @inbounds arr[arr[j]+1]
     end
 end
 
-function op_idx(arr, j, m, rel_base)
+function op_idx(arr::Vector{Int}, j::Int, m::Int, rel_base::Int)::Int
     if m == 2
-        return arr[j]+1+rel_base
+        return @inbounds arr[j]+1+rel_base
     elseif m == 1
         throw("error in assignment mode")
     else
-        return arr[j]+1
+        return @inbounds arr[j]+1
     end
 end
 
-function run_program!(arr, in_channel::Channel, out_channel::Channel)
+function run_program!(arr::Vector{Int}, in_channel::Channel, out_channel::Channel)
     i = 1
     jump = 4
     rel_base::Int = 0
     arr = cat(arr, zeros(Int, 1000), dims=1)
-    while arr[i] != 99
-        inst, m1, m2, m3 = parse_inst(arr[i])
+    @inbounds while arr[i] != 99
+        @inbounds inst, m1, m2, m3 = parse_inst(arr[i])
         if inst == 1
             operand1 = op(arr, i+1, m1, rel_base)
             operand2 = op(arr, i+2, m2, rel_base)
@@ -143,7 +143,7 @@ function run_program!(arr)
     channel_in = Channel()
     channel_out = Channel(Inf)
     arr = run_program!(arr, channel_in, channel_out)
-    isready(channel_out) && take!(channel_out)
+    arr
 end
 
 function run_program_last_out!(arr)

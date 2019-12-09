@@ -4,15 +4,15 @@ using LinearAlgebra, SparseArrays, Dates
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = split(read_input(cur_day), '\n') .|> x->split(x, ',')
+data = cur_day |> read_input |> read_lines |> x->split.(x, ',')
 # data = split("R8,U5,L5,D3\nU7,R6,D4,L4", '\n') .|> x->split(x, ',')
 # data = split("R75,D30,R83,U83,L12,D49,R71,U7,L72\nU62,R66,U55,R34,D71,R55,D58,R83", '\n') .|> x->split(x, ',')
 # data = split("R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51\nU98,R91,D20,R16,D67,R40,U7,R15,U6,R7", '\n') .|> x->split(x, ',')
 line1, line2 = data
-dirs1 = map(x->x[1], line1)
-lens1 = map(x->parse(Int, x[2:end]), line1)
-dirs2 = map(x->x[1], line2)
-lens2 = map(x->parse(Int, x[2:end]), line2)
+const dirs1::Vector{Char} = getindex.(line1, 1)
+const lens1::Vector{Int} = map(x->parse(Int, x[2:end]), line1)
+const dirs2::Vector{Char} = getindex.(line2, 1)
+const lens2::Vector{Int} = map(x->parse(Int, x[2:end]), line2)
 
 norm1(x) = norm(x, 1)
 function move(dir, len, point)
@@ -104,8 +104,8 @@ end
 using BenchmarkTools
 
 println(part1())
-#submit(part1(), cur_day, 1)
 @btime part1()
+#submit(part1(), cur_day, 1)
 println(part2())
-#submit(part2(), cur_day, 2)
 @btime part2()
+#submit(part2(), cur_day, 2)

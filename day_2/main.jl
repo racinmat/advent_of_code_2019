@@ -11,15 +11,15 @@ function part1()
     arr = copy(data)
     arr[2] = 12
     arr[3] = 2
-    run_program!(arr)
+    arr = run_program!(arr)
     arr[1]
 end
 
 function part2()
     for (i, j) in Iterators.product(0:99, 0:99)
-        arr = copy(data)
+        arr = data
         arr[2], arr[3] = i, j
-        run_program!(arr)
+        arr = run_program!(arr)
         arr[1] == 19690720 && return 100 * arr[2] + arr[3]
     end
 end
