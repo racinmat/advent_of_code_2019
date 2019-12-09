@@ -18,12 +18,23 @@ function parse_inst(inst)
     instruction, mode1, mode2, mode3
 end
 
+
 function run_program!(arr, in_channel::Channel, out_channel::Channel)
     i = 1
     jump = 4
+    rel_base = 0
+    arr = cat(arr, zeros(Int, 1000), dims=1)
     while arr[i] != 99
         inst, m1, m2, m3 = parse_inst(arr[i])
-        op(arr, j, m) = m == 1 ? arr[j] : arr[arr[j]+1]
+        function op(arr, j, m)
+            if m == 2
+                return arr[arr[j]+1+rel_base]
+            elseif m == 1
+                return arr[j]
+            else
+                return arr[arr[j]+1]
+            end
+        end
         if inst == 1
             operand1 = op(arr, i+1, m1)
             operand2 = op(arr, i+2, m2)
@@ -36,11 +47,9 @@ function run_program!(arr, in_channel::Channel, out_channel::Channel)
             jump = i+4
         elseif inst == 3
             arr[arr[i+1]+1] = take!(in_channel)
-            println("taking from in channel, value $(arr[arr[i+1]+1])")
             jump = i+2
         elseif inst == 4
             operand1 = op(arr, i+1, m1)
-            println("putting to out channel, value $operand1")
             put!(out_channel, operand1)
             jump = i+2
         elseif inst == 5
@@ -69,18 +78,23 @@ function run_program!(arr, in_channel::Channel, out_channel::Channel)
             operand2 = op(arr, i+2, m2)
             arr[arr[i+3]+1] = operand1 == operand2 ? 1 : 0
             jump = i+4
+        elseif inst == 9
+            operand1 = op(arr, i+1, m1)
+            rel_base += operand1
+            jump = i+2
         else
             throw("unknown instruction: $inst on step $i")
         end
         i = jump
     end
+    arr
 end
 
-function run_program!(arr, input::Int)
+function run_program!(arr, input_val::Int)
     channel_in = Channel(1)
     channel_out = Channel(Inf)
-    put!(channel_in, input)
-    program = @async run_program!(arr, channel_in, channel_out)
+    put!(channel_in, input_val)
+    arr = run_program!(arr, channel_in, channel_out)
     val = take!(channel_out)
     while val == 0
         val = take!(channel_out)
@@ -88,8 +102,59 @@ function run_program!(arr, input::Int)
     val
 end
 
+function run_program_last_out!(arr, input_val::Int)
+    channel_in = Channel(1)
+    channel_out = Channel(Inf)
+    put!(channel_in, input_val)
+    arr = run_program!(arr, channel_in, channel_out)
+    !isready(channel_out) && return nothing
+    val = 0
+    while isready(channel_out)
+        val = take!(channel_out)
+    end
+    val
+end
+
+function run_program_all_out!(arr, input_val::Int)
+    channel_in = Channel(1)
+    channel_out = Channel(Inf)
+    put!(channel_in, input_val)
+    arr = run_program!(arr, channel_in, channel_out)
+    !isready(channel_out) && return nothing
+    out_vals = Vector{Int}()
+    while isready(channel_out)
+        push!(out_vals, take!(channel_out))
+    end
+    out_vals
+end
+
 function run_program!(arr)
     channel_in = Channel()
-    channel_out = Channel()
-    program = run_program!(arr, channel_in, channel_out)
+    channel_out = Channel(Inf)
+    arr = run_program!(arr, channel_in, channel_out)
+    isready(channel_out) && take!(channel_out)
+end
+
+function run_program_last_out!(arr)
+    channel_in = Channel()
+    channel_out = Channel(Inf)
+    arr = run_program!(arr, channel_in, channel_out)
+    !isready(channel_out) && return nothing
+    val = 0
+    while isready(channel_out)
+        val = take!(channel_out)
+    end
+    val
+end
+
+function run_program_all_out!(arr)
+    channel_in = Channel()
+    channel_out = Channel(Inf)
+    arr = run_program!(arr, channel_in, channel_out)
+    !isready(channel_out) && return nothing
+    out_vals = Vector{Int}()
+    while isready(channel_out)
+        push!(out_vals, take!(channel_out))
+    end
+    out_vals
 end
