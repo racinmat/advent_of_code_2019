@@ -1,7 +1,7 @@
 using DrWatson
 quickactivate(@__DIR__)
 using LinearAlgebra, SparseArrays, Dates
-import Base: min, max
+import Base: min, max, findall
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -73,6 +73,20 @@ function build_grid()
         end
     end
     grid, start, min_x, min_y, max_x, max_y
+end
+
+function findall(f::Function, a::Array{T, N}) where {T, N}
+    j = 1
+    b = Vector{CartesianIndex{2}}(undef, length(a))
+    @inbounds for i in CartesianIndices(a)
+        @inbounds if f(a[i])
+            b[j] = i
+            j += 1
+        end
+    end
+    resize!(b, j-1)
+    sizehint!(b, length(b))
+    return b
 end
 
 function part1()
