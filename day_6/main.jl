@@ -22,10 +22,7 @@ function part1()
     end
     toposorted = topological_sort_by_dfs(g)
     states = floyd_warshall_shortest_paths(g)
-    tot_paths = 0
-    for i in g |> vertices
-        tot_paths += enumerate_paths(states, i) |> x->filter(y->length(y) > 0, x) |> length
-    end
+    tot_paths = (0 .< states.dists .< typemax(Int)) |> sum
     tot_paths
 end
 
@@ -41,7 +38,11 @@ function part2()
     paths.dists[paths.parents[name2int["SAN"]]] - 1
 end
 
+using BenchmarkTools
+
 println(part1())
-# submit(part1(), cur_day, 1)
+@btime part1()
+#submit(part1(), cur_day, 1)
 println(part2())
+@btime part2()
 # submit(part2(), cur_day, 2)

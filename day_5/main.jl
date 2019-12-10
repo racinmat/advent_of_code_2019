@@ -22,7 +22,7 @@ println(part1())
 #submit(part1(), cur_day, 1)
 println(part2())
 @btime part2()
-submit(part2(), cur_day, 2)
+# submit(part2(), cur_day, 2)
 
 run_program("3,9,8,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 7) == 0
 run_program("3,9,8,9,10,9,4,9,99,-1,8" |> x->read_numbers(x, ','), 8) == 1
