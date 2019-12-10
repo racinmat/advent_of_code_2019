@@ -416,9 +416,9 @@ version = "0.5.2"
 
 [[Rotations]]
 deps = ["LinearAlgebra", "StaticArrays", "Statistics"]
-git-tree-sha1 = "4fa94411637e4f4ca4d9b5bfa64d7042541d67b3"
+git-tree-sha1 = "cb70e13ed3d4b37caf93960676ef415da5979a93"
 uuid = "6038ab10-8711-5258-84ad-4b1120ba62dc"
-version = "0.12.0"
+version = "0.12.1"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -456,10 +456,10 @@ uuid = "276daf66-3868-5448-9aa4-cd146d93841b"
 version = "0.9.0"
 
 [[StaticArrays]]
-deps = ["LinearAlgebra", "Random", "Statistics"]
-git-tree-sha1 = "5a3bcb6233adabde68ebc97be66e95dcb787424c"
+deps = ["InteractiveUtils", "LinearAlgebra", "Random", "Statistics", "Test"]
+git-tree-sha1 = "3841b39ed5f047db1162627bf5f80a9cd3e39ae2"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "0.12.1"
+version = "0.10.3"
 
 [[Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
