@@ -1,5 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
+using Images
 include(projectdir("misc.jl"))
 include(projectdir("interpret.jl"))
 
@@ -54,7 +55,28 @@ function part1()
 end
 
 function part2()
-    data
+    visited = Set{CartesianIndex}()
+    grid = zeros(Int, 500, 500)
+    point = CartesianIndex(size(grid) .÷ 2)
+    grid[point] = 1
+    direction = Up
+    channel_in = Channel(Inf)
+    channel_out = Channel(Inf)
+    program = @async run_program!(copy(data), channel_in, channel_out)
+    push!(visited, point)
+    while true
+        put!(channel_in, grid[point])
+        if istaskdone(program)
+            break
+        end
+        color = take!(channel_out)
+        grid[point] = color
+        rotation = take!(channel_out)
+        direction = rot(direction, rotation)
+        point = move(point, direction)
+        push!(visited, point)
+    end
+    save("day-10-img.png", colorview(Gray, convert.(Float64, grid)))
 end
 
 println(part1())
