@@ -38,11 +38,9 @@ function part1()
     channel_out = Channel(Inf)
     program = @async run_program!(copy(data), channel_in, channel_out)
     push!(visited, point)
-    should_stop = false
-    while !should_stop
+    while true
         put!(channel_in, grid[point])
-        if istaskdone(channel_out)
-            should_stop = true
+        if istaskdone(program)
             break
         end
         color = take!(channel_out)
@@ -60,6 +58,6 @@ function part2()
 end
 
 println(part1())
-submit(part1(), cur_day, 1)
+# submit(part1(), cur_day, 1)
 println(part2())
 submit(part2(), cur_day, 2)
