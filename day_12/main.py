@@ -26,8 +26,8 @@ def iteration(positions, velocities, combs):
 
 
 def part1():
-    positions = np.array(data)
-    velocities = np.zeros_like(positions)
+    positions = np.array(data, dtype=np.int32)
+    velocities = np.zeros_like(positions, dtype=np.int32)
     combs = list(itertools.combinations(range(len(positions)), 2))
     for i in range(1000):
         iteration(positions, velocities, combs)
