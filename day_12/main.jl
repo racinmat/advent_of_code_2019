@@ -40,7 +40,7 @@ function part2()
     combs = combinations(1:size(positions)[1], 2) |> collect
     init_positions = copy(positions)
     # solving individual axes separately
-    repeat_indices = [0, 0, 0]
+    repeat_indices = MVector{3}([0, 0, 0])
     i = 1
     while any(repeat_indices .== 0)
         iteration!(positions, velocities, combs)

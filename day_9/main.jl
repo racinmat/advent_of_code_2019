@@ -14,10 +14,14 @@ function part2()
     run_program_last_out!(copy(data), 2)
 end
 
+using BenchmarkTools
+
 println(part1())
-submit(part1(), cur_day, 1)
+@btime part1()
+# submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)
 
 arr = "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99" |> x->read_numbers(x, ',')
 arr = "104,1125899906842624,99" |> x->read_numbers(x, ',')

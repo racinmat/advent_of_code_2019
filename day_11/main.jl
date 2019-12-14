@@ -32,7 +32,7 @@ data = cur_day |> read_input |> x->read_numbers(x, ',')
 
 function part1()
     visited = Set{CartesianIndex}()
-    grid = zeros(Int, 10000, 10000)
+    grid = zeros(Int, 500, 500)
     point = CartesianIndex(size(grid) .÷ 2)
     direction = Up
     channel_in = Channel(Inf)
@@ -79,7 +79,11 @@ function part2()
     save("day-10-img.png", colorview(Gray, convert.(Float64, grid)))
 end
 
+using BenchmarkTools
+
 println(part1())
+@btime part1()
 # submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)

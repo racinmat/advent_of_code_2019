@@ -2,17 +2,18 @@
 function parse_inst(inst::Int)::Tuple{Int, Int, Int, Int}
     nums = inst |> digits |> reverse
     instruction = inst % 100
-    if length(nums) == 1
+    num_len = length(nums)
+    if num_len == 1
         mode3 = mode2 = mode1 = 0
-    elseif length(nums) == 2
+    elseif num_len == 2
         mode3 = mode2 = mode1 = 0
-    elseif length(nums) == 3
+    elseif num_len == 3
         @inbounds mode1 = nums[1]
         mode3 = mode2 = 0
-    elseif length(nums) == 4
+    elseif num_len == 4
         @inbounds mode2, mode1 = nums[1:end-2]
         mode3 = 0
-    elseif length(nums) > 4
+    elseif num_len > 4
         @inbounds mode3, mode2, mode1 = nums[1:end-2]
     end
     instruction, mode1, mode2, mode3
@@ -49,17 +50,17 @@ function run_program!(arr::Vector{Int}, in_channel::Channel, out_channel::Channe
             operand1 = op(arr, i+1, m1, rel_base)
             operand2 = op(arr, i+2, m2, rel_base)
             operand3 = op_idx(arr, i+3, m3, rel_base)
-            arr[operand3] = operand1 + operand2
+            @inbounds arr[operand3] = operand1 + operand2
             jump = i+4
         elseif inst == 2
             operand1 = op(arr, i+1, m1, rel_base)
             operand2 = op(arr, i+2, m2, rel_base)
             operand3 = op_idx(arr, i+3, m3, rel_base)
-            arr[operand3] = operand1 * operand2
+            @inbounds arr[operand3] = operand1 * operand2
             jump = i+4
         elseif inst == 3
             operand3 = op_idx(arr, i+1, m1, rel_base)
-            arr[operand3] = take!(in_channel)
+            @inbounds arr[operand3] = take!(in_channel)
             jump = i+2
         elseif inst == 4
             operand1 = op(arr, i+1, m1, rel_base)
@@ -85,13 +86,13 @@ function run_program!(arr::Vector{Int}, in_channel::Channel, out_channel::Channe
             operand1 = op(arr, i+1, m1, rel_base)
             operand2 = op(arr, i+2, m2, rel_base)
             operand3 = op_idx(arr, i+3, m3, rel_base)
-            arr[operand3] = operand1 < operand2 ? 1 : 0
+            @inbounds arr[operand3] = operand1 < operand2 ? 1 : 0
             jump = i+4
         elseif inst == 8
             operand1 = op(arr, i+1, m1, rel_base)
             operand2 = op(arr, i+2, m2, rel_base)
             operand3 = op_idx(arr, i+3, m3, rel_base)
-            arr[operand3] = operand1 == operand2 ? 1 : 0
+            @inbounds arr[operand3] = operand1 == operand2 ? 1 : 0
             jump = i+4
         elseif inst == 9
             operand1 = op(arr, i+1, m1, rel_base)
