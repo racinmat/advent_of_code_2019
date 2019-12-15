@@ -50,7 +50,7 @@ function part2()
     arr[1] = 2
     program = @async run_program!(arr, channel_in, channel_out)
     grid_description = Vector{Int}()
-    sleep(1e-6)
+    sleep(1e-9)
     while isready(channel_out)
         push!(grid_description, take!(channel_out))
     end
@@ -65,7 +65,7 @@ function part2()
         put!(channel_in, direction)
 
         grid_description = Vector{Int}()
-        sleep(1e-6)
+        sleep(1e-9)
         while isready(channel_out)
             push!(grid_description, take!(channel_out))
         end
@@ -83,4 +83,4 @@ end
 println(part1())
 # submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+# submit(part2(), cur_day, 2)
