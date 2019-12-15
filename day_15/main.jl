@@ -1,6 +1,7 @@
 using DrWatson
 quickactivate(@__DIR__)
 using DataStructures
+using Base.Iterators: flatten
 include(projectdir("misc.jl"))
 include(projectdir("interpret.jl"))
 
@@ -12,10 +13,6 @@ struct Up <: Direction end
 struct Down <: Direction end
 struct Left <: Direction end
 struct Right <: Direction end
-
-# abstract type CellType end
-# struct Wall <: CellType end
-# struct Corridor <: CellType end
 
 Int(i::Type{Up}) = 1
 Int(i::Type{Down}) = 2
@@ -55,13 +52,13 @@ function try_move!(channel_in, channel_out, grid, direction, point)
     point
 end
 
-function explore_neighbours!(channel_in, channel_out, grid, borders, visited, preceder, point)
+function explore_neighbours!(channel_in, channel_out, grid, open_nodes, visited, preceder, point)
     for direction in directions
         new_point = try_move!(channel_in, channel_out, grid, direction, point)
         if new_point != point
             try_move!(channel_in, channel_out, grid, opposite(direction), new_point)
             if new_point ∉ visited
-                push!(borders, new_point)
+                push!(open_nodes, new_point)
                 preceder[new_point] = point
             end
         end
@@ -82,22 +79,18 @@ function part1()
     arr = copy(data)
     visited = Set{CartesianIndex}()
     # -1 is undiscovered
-    # grid = ones(Int, 500, 500) .* -1
     grid = ones(Int, 100, 100) .* -1
-    # grid = ones(Int, 30, 30) .* -1
     start_point = CartesianIndex(size(grid) .÷ 2)
     cur_point = start_point
     grid[cur_point] = 1
-    borders = Stack{CartesianIndex}()
-    push!(borders, cur_point)
+    open_nodes = Stack{CartesianIndex}()
+    push!(open_nodes, cur_point)
     program = @async run_program!(arr, channel_in, channel_out)
-    # todo: rewrite to DFS or BFS search
     num_steps = 0
     successor = Dict{CartesianIndex, CartesianIndex}()
     preceder = Dict{CartesianIndex, CartesianIndex}()
-    while !isempty(borders) && sum(grid .== 2) == 0
-    # for i in 1:20
-        new_point = pop!(borders)
+    while !isempty(open_nodes) && sum(grid .== 2) == 0
+        new_point = pop!(open_nodes)
         push!(visited, new_point)
         if is_neighbor(new_point, cur_point)
             direction = get_direction(cur_point, new_point)
@@ -116,22 +109,94 @@ function part1()
             preceder[tmp_point] = cur_point
             cur_point = tmp_point
         end
-        explore_neighbours!(channel_in, channel_out, grid, borders, visited, preceder, new_point)
+        explore_neighbours!(channel_in, channel_out, grid, open_nodes, visited, preceder, new_point)
         num_steps += 1
     end
 
     # calculating path length
     backtrack_point = cur_point
-    while backtrack_point != sta
+    path_length = 1
+    while backtrack_point != start_point
+        path_length += 1
+        backtrack_point = preceder[backtrack_point]
+    end
 
-    sum(grid .== 2)
+    path_length
 end
+
+function build_map()
+    # building map
+    channel_in = Channel(1)
+    channel_out = Channel(Inf)
+    arr = copy(data)
+    visited = Set{CartesianIndex}()
+    # -1 is undiscovered
+    grid = ones(Int, 100, 100) .* -1
+    start_point = CartesianIndex(size(grid) .÷ 2)
+    cur_point = start_point
+    grid[cur_point] = 1
+    open_nodes = Stack{CartesianIndex}()
+    push!(open_nodes, cur_point)
+    program = @async run_program!(arr, channel_in, channel_out)
+    num_steps = 0
+    successor = Dict{CartesianIndex, CartesianIndex}()
+    preceder = Dict{CartesianIndex, CartesianIndex}()
+    while !isempty(open_nodes)
+        new_point = pop!(open_nodes)
+        push!(visited, new_point)
+        if is_neighbor(new_point, cur_point)
+            direction = get_direction(cur_point, new_point)
+            tmp_point = try_move!(channel_in, channel_out, grid, direction, cur_point)
+            successor[cur_point] = tmp_point
+            preceder[tmp_point] = cur_point
+            cur_point = tmp_point
+        elseif new_point == cur_point
+            nothing
+        else
+            go_to_point!(channel_in, channel_out, grid, preceder, cur_point, preceder[new_point])
+            cur_point = preceder[new_point]
+            direction = get_direction(cur_point, new_point)
+            tmp_point = try_move!(channel_in, channel_out, grid, direction, cur_point)
+            successor[cur_point] = tmp_point
+            preceder[tmp_point] = cur_point
+            cur_point = tmp_point
+        end
+        explore_neighbours!(channel_in, channel_out, grid, open_nodes, visited, preceder, new_point)
+        num_steps += 1
+    end
+    grid
+end
+
+get_neighbors(grid, point) = [move(point, direction) for direction in directions if grid[move(point, direction)] == 1]
 
 function part2()
-    data
+    grid = build_map()
+    # oxygen == 2
+    oxygen_set = Set{CartesianIndex}()
+    open_nodes = Stack{Vector{CartesianIndex}}()
+    push!(oxygen_set, findfirst(x->x==2, grid))
+    push!(open_nodes, [findfirst(x->x==2, grid)])
+    i = 0
+    while !isempty(open_nodes)
+        cur_layer = pop!(open_nodes)
+        new_layer = cur_layer .|> (x->get_neighbors(grid, x)) |> flatten |> unique
+        if isempty(new_layer)
+            break
+        end
+        for i in new_layer
+            grid[i] = 2
+        end
+        push!(open_nodes, new_layer)
+        i += 1
+    end
+    i
 end
 
+using BenchmarkTools
+
 println(part1())
-submit(part1(), cur_day, 1)
+@btime part1()
+# submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)
