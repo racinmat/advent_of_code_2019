@@ -13,8 +13,8 @@ function parse_row(str)
 end
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = cur_day |> read_input |> x->split(x, '\n') .|> parse_row
-# data = cur_day |> test_input|> x->rstrip(x, '\n')  |> x->split(x, '\n') .|> parse_row
+# data = cur_day |> read_input |> x->split(x, '\n') .|> parse_row
+data = cur_day |> test_input|> x->rstrip(x, '\n')  |> x->split(x, '\n') .|> parse_row
 
 # todo: try to rewrite it to arrays, translate in the beginning and benchmark
 # translating to arrays
@@ -48,7 +48,7 @@ function calc_production!(required::Vector{Int}, produced::Vector{Int}, ingredie
     in_stuff = ingredients[material]
     in_amounts = in_volumes[material]
     # daster heuristics
-    mults = required[material] ÷ produced[material]
+    @inbounds mults = (required[material] - produced[material]) ÷ out_volumes[material]
     if mults > 0
         for i in 1:length(in_stuff)
             calc_production!(required, produced, ingredients, in_volumes, out_volumes, in_stuff[i], in_amounts[i] * mults)
@@ -70,26 +70,24 @@ function part1()
     calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 1)
     produced[name2idx["ORE"]]
 end
-10 ÷ 3
-required = zeros(Int, length(name2idx))
-produced = zeros(Int, length(name2idx))
-@time calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 100)
 
 function part2()
     required = zeros(Int, length(name2idx))
     produced = zeros(Int, length(name2idx))
     calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 1)
-    lower_bound = 1_000_000_000_000 ÷ produced[name2idx["ORE"]]
-    @time calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], lower_bound)
+    max_ore = 1_000_000_000_000
+    lower_bound = max_ore ÷ produced[name2idx["ORE"]]
+    calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], lower_bound)
+    while produced[name2idx["ORE"]] <= max_ore
+        calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 1)
+    end
+    produced[name2idx["FUEL"]]
 end
 
 using BenchmarkTools
 
 println(part1())
 @btime part1()
-println(part1int())
-@btime part1int()
 # submit(part1(), cur_day, 1)
 println(part2())
 submit(part2(), cur_day, 2)
-1000000000000 ÷ 13312
