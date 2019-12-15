@@ -13,8 +13,8 @@ function parse_row(str)
 end
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-# data = cur_day |> read_input |> x->split(x, '\n') .|> parse_row
-data = cur_day |> test_input|> x->rstrip(x, '\n')  |> x->split(x, '\n') .|> parse_row
+data = cur_day |> read_input |> x->split(x, '\n') .|> parse_row
+# data = cur_day |> test_input|> x->rstrip(x, '\n')  |> x->split(x, '\n') .|> parse_row
 
 # todo: try to rewrite it to arrays, translate in the beginning and benchmark
 # translating to arrays
@@ -76,12 +76,24 @@ function part2()
     produced = zeros(Int, length(name2idx))
     calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 1)
     max_ore = 1_000_000_000_000
-    lower_bound = max_ore ÷ produced[name2idx["ORE"]]
+    ore_per_1_fuel = produced[name2idx["ORE"]]
+    lower_bound = (max_ore - produced[name2idx["ORE"]]) ÷ ore_per_1_fuel
     calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], lower_bound)
+
+    # heuristics to match-wise reach to the limit
+    lower_bound = (max_ore - produced[name2idx["ORE"]]) ÷ ore_per_1_fuel
+    while lower_bound > 0
+        calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], lower_bound)
+        lower_bound = (max_ore - produced[name2idx["ORE"]]) ÷ ore_per_1_fuel
+    end
+
+    # fine-grained tuning
     while produced[name2idx["ORE"]] <= max_ore
         calc_production!(required, produced, ingredients_int, in_volumes_int, out_volumes_int, name2idx["FUEL"], 1)
     end
-    produced[name2idx["FUEL"]]
+
+    # this while cycle always overshoots 1 item
+    produced[name2idx["FUEL"]] - 1
 end
 
 using BenchmarkTools
@@ -90,4 +102,5 @@ println(part1())
 @btime part1()
 # submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)
