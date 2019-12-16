@@ -334,9 +334,9 @@ uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "0.3.3"
 
 [[OffsetArrays]]
-git-tree-sha1 = "27f32af4e7b11f5aa9f3cad60b777cd042af149a"
+git-tree-sha1 = "87d0a91efe29352d5caaa271ae3927083c096e33"
 uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "0.11.3"
+version = "0.11.4"
 
 [[OpenSpecFun_jll]]
 deps = ["Libdl", "Pkg"]
@@ -479,6 +479,11 @@ version = "0.32.0"
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[[ThreadTools]]
+git-tree-sha1 = "c0c07f8630736c8e38c4efdf89be503d28797c7e"
+uuid = "dbf13d8f-d36e-4350-8970-f3a99faba1a8"
+version = "0.1.1"
 
 [[TiledIteration]]
 deps = ["OffsetArrays", "Test"]

@@ -171,21 +171,17 @@ get_neighbors(grid, point) = [move(point, direction) for direction in directions
 
 function part2()
     grid = build_map()
-    # oxygen == 2
     oxygen_set = Set{CartesianIndex}()
     open_nodes = Stack{Vector{CartesianIndex}}()
-    push!(oxygen_set, findfirst(x->x==2, grid))
-    push!(open_nodes, [findfirst(x->x==2, grid)])
+    init_oxygen = findfirst(x->x==2, grid)
+    push!(oxygen_set, init_oxygen)
+    push!(open_nodes, [init_oxygen])
     i = 0
     while !isempty(open_nodes)
         cur_layer = pop!(open_nodes)
         new_layer = cur_layer .|> (x->get_neighbors(grid, x)) |> flatten |> unique
-        if isempty(new_layer)
-            break
-        end
-        for i in new_layer
-            grid[i] = 2
-        end
+        isempty(new_layer) && break
+        grid[new_layer] .= 2
         push!(open_nodes, new_layer)
         i += 1
     end
