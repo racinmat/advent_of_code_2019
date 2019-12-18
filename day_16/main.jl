@@ -21,15 +21,41 @@ function fourier_line(data::Vector{Int}, multiplier::Int)::Int
         return @inbounds abs(sum(base_pattern[mod_index(i, multiplier)]*data[i] for i in multiplier:length(data)) % 10)
     elseif (multiplier * 2) <= length(data)
         # in the second thirs, the only non-zero coefficient are 1, simple summing should do
-        return abs(sum(data[multiplier:(multiplier * 2 -1)]) % 10)
+        return abs(sum(data[multiplier:(multiplier * 2 - 1)]) % 10)
     else
         # in the second half, the only coefficients after padding are 1, simple summing should do
         return abs(sum(data[multiplier:end]) % 10)
     end
 end
 
-fourier(data) = [fourier_line(data, i) for i in 1:length(data)]
-fourier_2(data) = [fourier_line_2(data, i) for i in 1:length(data)]
+function fourier(data, offset::Int=1)
+    arr_half = length(data) ÷ 2
+    if offset <= arr_half
+        part_1_data = [fourier_line(data, i) for i in offset:arr_half]
+        last_val = data[end]
+        part_2_data = zeros(Int, arr_half)
+        part_2_data[end] = last_val
+        @inbounds for (i, j) in enumerate(length(data)-1:-1:(length(data) ÷ 2 + 1))
+            partial_sum = abs((last_val + data[j]) % 10)
+            part_2_data[arr_half - i] = partial_sum
+            last_val = partial_sum
+        end
+        return vcat(part_1_data, part_2_data)
+    else
+        start_idx = offset - arr_half
+        last_val = data[end]
+        part_2_data_len = length(data) - offset + 1
+        part_2_data = zeros(Int, part_2_data_len)
+        part_2_data[end] = last_val
+        @inbounds for (i, j) in enumerate(length(data)-1:-1:length(data)-part_2_data_len+1)
+            partial_sum = abs((last_val + data[j]) % 10)
+            part_2_data[part_2_data_len - i] = partial_sum
+            last_val = partial_sum
+        end
+        return part_2_data
+    end
+end
+
 fourier_2_time(data) = [@time fourier_line_2(data, i) for i in 1:length(data)]
 fourier_2_part_1(data) = [fourier_line_2(data, i) for i in 1:(length(data) ÷ 2)]
 fourier_2_part_2(data) = [fourier_line_2(data, i) for i in (length(data) ÷ 2):length(data)]
@@ -69,17 +95,26 @@ length(repeat(data, 1000))
 (length(temp_data) - offset) / length(temp_data)
 
 data_10 = repeat(data, 10)
-@time fourier_2_part_1(data_10)
-@time fourier_2_part_2(data_10)
+data_100 = repeat(data, 100)
+@time fourier(data_10)
+@time fourier_2(data_10)
+@time fourier(data_100)
+@time fourier_2(data_100)
+@time fourier(data_100, 10000)
+@time fourier_2(data_100, 10000)
+@time fourier(data_100, 40000)
+@time fourier_2(data_100, 40000)
 
 fourier_2_time(data)
 all(fourier(data) .== fourier_2(data))
+all(fourier(data, 400) .== fourier_2(data, 400))
 @btime fourier(data)
 @btime fourier_2(data)
 @time fourier(repeat(data, 1))
 @time fourier(repeat(data, 10))
 @time fourier(repeat(data, 10), 1000)
 @time fourier(repeat(data, 100))
+@time fourier(repeat(data, 100), 10000)
 @time fourier(repeat(data, 1000))
 @btime fourier_2(data)
 @time fourier_2(repeat(data, 1))
@@ -89,6 +124,8 @@ all(fourier(data) .== fourier_2(data))
 fourier(data)[100:end]
 fourier(data)
 fourier_2(data)
+fourier(data, 400)
+fourier_2(data, 400)
 
 @time fourier(repeat(data, 100))
 @btime fourier_2(data)
