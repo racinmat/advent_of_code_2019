@@ -30,6 +30,7 @@ end
 
 function fourier(data, offset::Int=1)
     arr_half = length(data) ÷ 2
+    part_0_data = zeros(Int, offset-1)
     if offset <= arr_half
         part_1_data = [fourier_line(data, i) for i in offset:arr_half]
         last_val = data[end]
@@ -40,7 +41,7 @@ function fourier(data, offset::Int=1)
             part_2_data[arr_half - i] = partial_sum
             last_val = partial_sum
         end
-        return vcat(part_1_data, part_2_data)
+        return vcat(part_0_data, part_1_data, part_2_data)
     else
         start_idx = offset - arr_half
         last_val = data[end]
@@ -52,7 +53,7 @@ function fourier(data, offset::Int=1)
             part_2_data[part_2_data_len - i] = partial_sum
             last_val = partial_sum
         end
-        return part_2_data
+        return vcat(part_0_data, part_2_data)
     end
 end
 
@@ -88,55 +89,9 @@ end
 
 using BenchmarkTools
 
-length(temp_data)
-length(temp_data) - offset
-length(repeat(data, 100))
-length(repeat(data, 1000))
-(length(temp_data) - offset) / length(temp_data)
-
-data_10 = repeat(data, 10)
-data_100 = repeat(data, 100)
-@time fourier(data_10)
-@time fourier_2(data_10)
-@time fourier(data_100)
-@time fourier_2(data_100)
-@time fourier(data_100, 10000)
-@time fourier_2(data_100, 10000)
-@time fourier(data_100, 40000)
-@time fourier_2(data_100, 40000)
-
-fourier_2_time(data)
-all(fourier(data) .== fourier_2(data))
-all(fourier(data, 400) .== fourier_2(data, 400))
-@btime fourier(data)
-@btime fourier_2(data)
-@time fourier(repeat(data, 1))
-@time fourier(repeat(data, 10))
-@time fourier(repeat(data, 10), 1000)
-@time fourier(repeat(data, 100))
-@time fourier(repeat(data, 100), 10000)
-@time fourier(repeat(data, 1000))
-@btime fourier_2(data)
-@time fourier_2(repeat(data, 1))
-@time fourier_2(repeat(data, 10))
-@time fourier_2(repeat(data, 100))
-
-fourier(data)[100:end]
-fourier(data)
-fourier_2(data)
-fourier(data, 400)
-fourier_2(data, 400)
-
-@time fourier(repeat(data, 100))
-@btime fourier_2(data)
-@btime fourier_3(data)
-fourier(data)
-fourier_2(data)
-all(fourier(data) .== fourier_2(data))
-@time fourier(temp_data)
-
 println(part1())
 @btime part1()
 # submit(part1(), cur_day, 1)
 println(part2())
+@btime part2()
 submit(part2(), cur_day, 2)
