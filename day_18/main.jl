@@ -28,7 +28,8 @@ function build_graph(data)
     door2neighbors = Dict{Char, Vector{Int}}()
     for (i, j) in enumerate(CartesianIndices(data))
         if data[j] == '#'
-            for n in neighbors(g, i)
+            neighbors_to_remove = neighbors(g, i) |> collect
+            for n in neighbors_to_remove
                 rem_edge!(g, i, n)
             end
         elseif data[j] == '@'
@@ -65,6 +66,9 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
     end
     # removing from key2node so I keep only remaining ones
     delete!(key2node, next_key)
+
+    draw_grid(g, key2node, door2node, cur_node)
+
     states.dists[cur_node, next_node], next_node
 end
 
@@ -91,6 +95,7 @@ end
 function solve_branch(g, start_node, key2node, door2neighbors, door2node)
     g = copy(g)
     key2node = copy(key2node)
+    door2node = copy(door2node)
     have_keys = Set{Char}()
     total_dist = 0
     cur_node = start_node
@@ -109,22 +114,53 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node)
         avail_keys = get_avail_keys(states, cur_node, key2node)
     end
 
-    println("multiple keys available")
-    println(avail_keys)
-    # todo: dont generate permutations, instead, try for all starters
-    total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, avail_keys |> keys)
+    if !isempty(key2node) && length(avail_keys) > 1
+        println("multiple keys available")
+        println(avail_keys)
+        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, avail_keys |> keys)
+    end
     total_dist
 end
 
 function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick)
     g = copy(g)
     key2node = copy(key2node)
+    door2node = copy(door2node)
     have_keys = Set{Char}()
     total_dist = 0
     states = floyd_warshall_shortest_paths(g)
     total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, states, start_node)
     total_dist += solve_branch(g, start_node, key2node, door2neighbors, door2node)
     total_dist
+end
+cur_node=start_node
+function draw_grid(g, key2node, door2node, cur_node)
+    data_to_print = copy(data)
+    for (i, j) in enumerate(CartesianIndices(data))
+        if i ∈ values(key2node)
+            for (letter, node) in key2node
+                if i == node
+                    data_to_print[j] = letter
+                end
+            end
+        elseif i ∈ values(door2node)
+            for (letter, node) in door2node
+                if i == node
+                    data_to_print[j] = letter
+                end
+            end
+        elseif i == cur_node
+            data_to_print[j] = '@'
+        elseif degree(g, i) == 0
+            data_to_print[j] = '#'
+        elseif degree(g, i) > 0
+            data_to_print[j] = '.'
+        end
+    end
+    for i in 1:size(data_to_print)[1]
+        println(join(data_to_print[i, :]))
+    end
+    println()
 end
 
 function part1()
