@@ -56,48 +56,74 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
     push!(have_keys, next_key)
     # I have gathered key, adding edges for its doors
     next_door = uppercase(next_key)
-    # checking adding edges
-    neighbors(g, door2node[next_door])
-    for neighbor in door2neighbors[next_door]
-        add_edge!(g, door2node[next_door], neighbor)
+    if haskey(door2neighbors, next_door)   # for the last key there is no door
+        # adding edges
+        for neighbor in door2neighbors[next_door]
+            add_edge!(g, door2node[next_door], neighbor)
+        end
+        delete!(door2node, next_door)
     end
-    neighbors(g, door2node[next_door])
     # removing from key2node so I keep only remaining ones
     delete!(key2node, next_key)
     states.dists[cur_node, next_node], next_node
 end
 
 # looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, key_permuts)
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys, avail_keys)
+    g = copy(g)
+    key2node = copy(key2node)
+    have_keys = copy(have_keys)
     best_dist = typemax(Int)
-    for key_permut in key_permuts
-
+    best_start_key = nothing
+    println(avail_keys)
+    states = floyd_warshall_shortest_paths(g)
+    # trying all possible keys to start with
+    for key_to_start in avail_keys
+        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start)
+        if dist_travelled < best_dist
+            best_dist = dist_travelled
+            best_start_key = key_to_start
+        end
     end
+    best_dist
 end
 
 function solve_branch(g, start_node, key2node, door2neighbors, door2node)
     g = copy(g)
-    have_keys = Set{Char}()
     key2node = copy(key2node)
+    have_keys = Set{Char}()
     total_dist = 0
     cur_node = start_node
-    while !isempty(key2node)
-        # looking which keys I can gather
-        states = floyd_warshall_shortest_paths(g)
-        avail_keys = get_avail_keys(states, start_node, key2node)
 
+    # looking which keys I can gather
+    states = floyd_warshall_shortest_paths(g)
+    avail_keys = get_avail_keys(states, start_node, key2node)
+    while !isempty(key2node) && length(avail_keys) == 1
         # only 1 key available
-        if length(avail_keys) > 1
-            println(avail_keys)
-            # todo: dont generate permutations, instead, try for all starters
-            child_branches = avail_keys |> keys |> collect |> permutations |> collect
-            println(child_branches)
-        end
-        @assert length(avail_keys) == 1
+        # todo: probably run only while there is only one key, if there is more of them, go deep the recursion
         next_key = avail_keys |> keys |> first
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, states, cur_node)
         total_dist += dist_travelled
+
+        states = floyd_warshall_shortest_paths(g)
+        avail_keys = get_avail_keys(states, cur_node, key2node)
     end
+
+    println("multiple keys available")
+    println(avail_keys)
+    # todo: dont generate permutations, instead, try for all starters
+    total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, avail_keys |> keys)
+    total_dist
+end
+
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick)
+    g = copy(g)
+    key2node = copy(key2node)
+    have_keys = Set{Char}()
+    total_dist = 0
+    states = floyd_warshall_shortest_paths(g)
+    total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, states, start_node)
+    total_dist += solve_branch(g, start_node, key2node, door2neighbors, door2node)
     total_dist
 end
 
