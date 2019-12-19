@@ -43,7 +43,7 @@ function run_program!(arr::Vector{Int}, in_channel::Channel, out_channel::Channe
     i = 1
     jump = 4
     rel_base::Int = 0
-    arr = cat(arr, zeros(Int, 1000), dims=1)
+    arr = cat(arr, zeros(Int, 2000), dims=1)
     @inbounds while arr[i] != 99
         @inbounds inst, m1, m2, m3 = parse_inst(arr[i])
         if inst == 1
