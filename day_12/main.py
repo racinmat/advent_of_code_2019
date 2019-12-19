@@ -29,7 +29,7 @@ def part1():
     positions = np.array(data, dtype=np.int32)
     velocities = np.zeros_like(positions, dtype=np.int32)
     combs = list(itertools.combinations(range(len(positions)), 2))
-    for i in range(1000):
+    for i in range(1_000):
         iteration(positions, velocities, combs)
 
     return sum(np.sum(np.abs(positions), axis=1) * np.sum(np.abs(velocities), axis=1))
