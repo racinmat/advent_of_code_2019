@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs
+using LightGraphs, Combinatorics
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -51,9 +51,8 @@ function build_graph(data)
     g, key2node, door2node, door2neighbors, start_node
 end
 
-function take_key!(g, avail_keys)
-    next_key = avail_keys |> keys |> first
-    cur_node = key2node[next_key]
+function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, states, cur_node)
+    next_node = key2node[next_key]
     push!(have_keys, next_key)
     # I have gathered key, adding edges for its doors
     next_door = uppercase(next_key)
@@ -65,39 +64,64 @@ function take_key!(g, avail_keys)
     neighbors(g, door2node[next_door])
     # removing from key2node so I keep only remaining ones
     delete!(key2node, next_key)
+    states.dists[cur_node, next_node], next_node
+end
+
+# looking at the problem as branch and bounds ~or sth like this
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, key_permuts)
+    best_dist = typemax(Int)
+    for key_permut in key_permuts
+
+    end
+end
+
+function solve_branch(g, start_node, key2node, door2neighbors, door2node)
+    g = copy(g)
+    have_keys = Set{Char}()
+    key2node = copy(key2node)
+    total_dist = 0
+    cur_node = start_node
+    while !isempty(key2node)
+        # looking which keys I can gather
+        states = floyd_warshall_shortest_paths(g)
+        avail_keys = get_avail_keys(states, start_node, key2node)
+
+        # only 1 key available
+        if length(avail_keys) > 1
+            println(avail_keys)
+            # todo: dont generate permutations, instead, try for all starters
+            child_branches = avail_keys |> keys |> collect |> permutations |> collect
+            println(child_branches)
+        end
+        @assert length(avail_keys) == 1
+        next_key = avail_keys |> keys |> first
+        dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, states, cur_node)
+        total_dist += dist_travelled
+    end
+    total_dist
 end
 
 function part1()
     g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+    solve_branch(g, start_node, key2node, door2neighbors, door2node)
 end
 
-g, key2node, door2node, door2neighbors, start_node = build_graph(data)
-
-have_keys = Set{Char}()
-# looking which keys I can gather
-states = floyd_warshall_shortest_paths(g)
-avail_keys = get_avail_keys(states, start_node, key2node)
-
-# only 1 key available
-length(avail_keys) == 1
-@assert length(avail_keys) == 1
-next_key = avail_keys |> keys |> first
-cur_node = key2node[next_key]
-push!(have_keys, next_key)
-# I have gathered key, adding edges for its doors
-next_door = uppercase(next_key)
-# checking adding edges
-neighbors(g, door2node[next_door])
-for neighbor in door2neighbors[next_door]
-    add_edge!(g, door2node[next_door], neighbor)
-end
-neighbors(g, door2node[next_door])
-# removing from key2node so I keep only remaining ones
-delete!(key2node, next_key)
-
-# searching for next keys
-states = floyd_warshall_shortest_paths(g)
-avail_keys = get_avail_keys(states, start_node, key2node)
+# g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+#
+# have_keys = Set{Char}()
+# # looking which keys I can gather
+# states = floyd_warshall_shortest_paths(g)
+# avail_keys = get_avail_keys(states, start_node, key2node)
+#
+# # only 1 key available
+# length(avail_keys) == 1
+# @assert length(avail_keys) == 1
+# next_key = avail_keys |> keys |> first
+# dist_travelled = take_key!(g, key2node, next_key, states, cur_node)
+#
+# # searching for next keys
+# states = floyd_warshall_shortest_paths(g)
+# avail_keys = get_avail_keys(states, start_node, key2node)
 
 function part2()
     # nodes = data |> flatten |> unique
