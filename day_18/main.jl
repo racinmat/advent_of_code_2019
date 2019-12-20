@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -11,24 +11,33 @@ data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> coll
 
 function build_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
+    g = MetaGraph(g)
     start_node = 0
     key2node = Dict{Char, Int}()
     door2node = Dict{Char, Int}()
     door2neighbors = Dict{Char, Vector{Int}}()
     for (i, j) in enumerate(CartesianIndices(data))
-        if data[j] == '#'
-            neighbors_to_remove = neighbors(g, i) |> collect
-            for n in neighbors_to_remove
-                rem_edge!(g, i, n)
-            end
-        elseif data[j] == '@'
-            start_node = i
-        elseif Int('a') <= Int(data[j]) <= Int('z')
-            key2node[data[j]] = i
-        elseif Int('A') <= Int(data[j]) <= Int('Z')
-            door2node[data[j]] = i
+        set_prop!(g, i, :coords, j)
+    end
+
+    for vertex in nv(g):-1:1
+        coords = get_prop(g, vertex, :coords)
+        if data[coords] == '#'
+            rem_vertex!(g, vertex)
         end
     end
+
+    for vertex in vertices(g)
+        coords = get_prop(g, vertex, :coords)
+        if data[coords] == '@'
+            start_node = vertex
+        elseif Int('a') <= Int(data[coords]) <= Int('z')
+            key2node[data[coords]] = vertex
+        elseif Int('A') <= Int(data[coords]) <= Int('Z')
+            door2node[data[coords]] = vertex
+        end
+    end
+    # need to remap vertices, theirs numbering is changed after removal
 
     for (letter, node) in door2node
         neighbors_list = neighbors(g, node) |> collect
@@ -38,7 +47,7 @@ function build_graph(data)
         end
     end
 
-    g, key2node, door2node, door2neighbors, start_node
+    g.graph, key2node, door2node, door2neighbors, start_node
 end
 
 DistCache = Dict{Set{Char}, Array{Int, 2}}
@@ -47,7 +56,7 @@ SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal fr
 node2coords = Dict(i => Tuple(j) for (i, j) in enumerate(CartesianIndices(data)))
 coords2node = Dict(Tuple(j) => i for (i, j) in enumerate(CartesianIndices(data)))
 
-function shortest_paths(g::SimpleGraph, dist_cache::DistCache, have_keys)
+function shortest_paths(g::AbstractGraph, dist_cache::DistCache, have_keys)
     if !haskey(dist_cache, have_keys)
         states = floyd_warshall_shortest_paths(g)
         dist_cache[copy(have_keys)] = copy(states.dists)
@@ -57,7 +66,7 @@ function shortest_paths(g::SimpleGraph, dist_cache::DistCache, have_keys)
     # states.dists
 end
 
-function get_avail_keys(g::SimpleGraph, cur_pos, key2node, dist_cache::DistCache, have_keyse)
+function get_avail_keys(g::AbstractGraph, cur_pos, key2node, dist_cache::DistCache, have_keyse)
     dists = shortest_paths(g, dist_cache, have_keys)
     get_avail_keys(dists, cur_pos, key2node)
 end
@@ -196,9 +205,13 @@ end
 
 function part1()
     g, key2node, door2node, door2neighbors, start_node = build_graph(data)
-    to = TimerOutput()
     solve_branch(g, start_node, key2node, door2neighbors, door2node)
     # display(to)
+end
+
+for vertex in vertices(g)
+    print("$vertex, $(Tuple(get_prop(g, vertex, :coords))) has neighbours: ")
+    println([Tuple(get_prop(g, i, :coords)) for i in neighbors(g, vertex)])
 end
 
 using BenchmarkTools
