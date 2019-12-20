@@ -4,10 +4,10 @@ using LightGraphs, Combinatorics, TimerOutputs
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
-    x->hcat(x...) |> x->permutedims(x, [2, 1])
-# data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
 #     x->hcat(x...) |> x->permutedims(x, [2, 1])
+data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+    x->hcat(x...) |> x->permutedims(x, [2, 1])
 
 function build_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
@@ -49,7 +49,7 @@ coords2node = Dict(Tuple(j) => i for (i, j) in enumerate(CartesianIndices(data))
 
 function shortest_paths(g::SimpleGraph, dist_cache::DistCache, have_keys)
     if !haskey(dist_cache, have_keys)
-        @timeit to "floyd_warshall" states = floyd_warshall_shortest_paths(g)
+        states = floyd_warshall_shortest_paths(g)
         dist_cache[copy(have_keys)] = copy(states.dists)
     end
     dist_cache[have_keys]
@@ -58,7 +58,7 @@ function shortest_paths(g::SimpleGraph, dist_cache::DistCache, have_keys)
 end
 
 function get_avail_keys(g::SimpleGraph, cur_pos, key2node, dist_cache::DistCache, have_keyse)
-    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+    dists = shortest_paths(g, dist_cache, have_keys)
     get_avail_keys(dists, cur_pos, key2node)
 end
 
@@ -101,7 +101,7 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     best_start_key = nothing
     # trying all possible keys to start with
     for key_to_start in avail_keys
-        @timeit to "solve_branch" dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache)
+        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache)
         if dist_travelled < best_dist
             best_dist = dist_travelled
             best_start_key = key_to_start
@@ -127,24 +127,23 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     cur_node = start_node
 
     # looking which keys I can gather
-    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+    dists = shortest_paths(g, dist_cache, have_keys)
     avail_keys = get_avail_keys(dists, start_node, key2node)
     while !isempty(key2node) && length(avail_keys) == 1
         # only 1 key available
-        # todo: probably run only while there is only one key, if there is more of them, go deep the recursion
         next_key = avail_keys |> keys |> first
-        @timeit to "take_key" dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node)
+        dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node)
         total_dist += dist_travelled
 
         # println("solving branch: keys: $have_keys, start: $cur_node, num_edges: $(ne(g))")
-        @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+        dists = shortest_paths(g, dist_cache, have_keys)
         avail_keys = get_avail_keys(dists, cur_node, key2node)
     end
 
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
-        @timeit to "solve_branches" total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, avail_keys |> keys)
+        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, avail_keys |> keys)
     end
     # println("dist from $start_node to end: $total_dist")
     sol_cache[cache_key] = total_dist
@@ -158,10 +157,10 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     door2node = copy(door2node)
     have_keys = copy(have_keys)
     total_dist = 0
-    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
-    @timeit to "take_key" total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node)
+    dists = shortest_paths(g, dist_cache, have_keys)
+    total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node)
     # println("dist from $start_node to $cur_node: $total_dist")
-    @timeit to "solve_branch" total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache)
+    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache)
     # println("dist from $start_node to end: $total_dist")
     total_dist
 end
