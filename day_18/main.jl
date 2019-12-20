@@ -67,23 +67,27 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
     # removing from key2node so I keep only remaining ones
     delete!(key2node, next_key)
 
-    draw_grid(g, key2node, door2node, cur_node)
+    # draw_grid(g, key2node, door2node, cur_node)
 
-    states.dists[cur_node, next_node], next_node
+    dist_traveled = states.dists[cur_node, next_node]
+    println("keys gathered: $have_keys")
+    println("travelling from $cur_node to $next_node: $dist_traveled")
+    dist_traveled, next_node
 end
 
 # looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys, avail_keys)
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set, avail_keys)
     g = copy(g)
     key2node = copy(key2node)
+    door2node = copy(door2node)
     have_keys = copy(have_keys)
     best_dist = typemax(Int)
     best_start_key = nothing
-    println(avail_keys)
+    # println(avail_keys)
     states = floyd_warshall_shortest_paths(g)
     # trying all possible keys to start with
     for key_to_start in avail_keys
-        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start)
+        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys)
         if dist_travelled < best_dist
             best_dist = dist_travelled
             best_start_key = key_to_start
@@ -92,11 +96,13 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     best_dist
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node)
+solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}())
+
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set)
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
-    have_keys = Set{Char}()
+    have_keys = copy(have_keys)
     total_dist = 0
     cur_node = start_node
 
@@ -115,25 +121,28 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node)
     end
 
     if !isempty(key2node) && length(avail_keys) > 1
-        println("multiple keys available")
-        println(avail_keys)
+        # println("multiple keys available")
+        # println(avail_keys)
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, avail_keys |> keys)
     end
+    # println("dist from $start_node to end: $total_dist")
     total_dist
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick)
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set)
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
-    have_keys = Set{Char}()
+    have_keys = copy(have_keys)
     total_dist = 0
     states = floyd_warshall_shortest_paths(g)
     total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, states, start_node)
-    total_dist += solve_branch(g, start_node, key2node, door2neighbors, door2node)
+    # println("dist from $start_node to $cur_node: $total_dist")
+    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys)
+    # println("dist from $start_node to end: $total_dist")
     total_dist
 end
-cur_node=start_node
+
 function draw_grid(g, key2node, door2node, cur_node)
     data_to_print = copy(data)
     for (i, j) in enumerate(CartesianIndices(data))
@@ -167,6 +176,7 @@ function part1()
     g, key2node, door2node, door2neighbors, start_node = build_graph(data)
     solve_branch(g, start_node, key2node, door2neighbors, door2node)
 end
+
 
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
 #
