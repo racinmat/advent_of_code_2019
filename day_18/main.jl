@@ -1,24 +1,13 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics
+using LightGraphs, Combinatorics, TimerOutputs
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
-#     x->hcat(x...) |> x->permutedims(x, [2, 1])
-data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
     x->hcat(x...) |> x->permutedims(x, [2, 1])
-
-function get_avail_keys(g::SimpleGraph, cur_pos, key2node)
-    states = floyd_warshall_shortest_paths(g)
-    get_avail_keys(states, cur_pos, key2node)
-end
-
-function get_avail_keys(states::LightGraphs.FloydWarshallState, cur_pos, key2node)
-    dist_from_node = states.dists[cur_pos, :]
-    let2dist = Dict(letter=>dist_from_node[node] for (letter, node) in key2node if dist_from_node[node] < typemax(Int))
-    let2dist
-end
+# data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
 function build_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
@@ -52,7 +41,34 @@ function build_graph(data)
     g, key2node, door2node, door2neighbors, start_node
 end
 
-function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, states, cur_node)
+DistCache = Dict{Set{Char}, Array{Int, 2}}
+SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
+
+node2coords = Dict(i => Tuple(j) for (i, j) in enumerate(CartesianIndices(data)))
+coords2node = Dict(Tuple(j) => i for (i, j) in enumerate(CartesianIndices(data)))
+
+function shortest_paths(g::SimpleGraph, dist_cache::DistCache, have_keys)
+    if !haskey(dist_cache, have_keys)
+        @timeit to "floyd_warshall" states = floyd_warshall_shortest_paths(g)
+        dist_cache[copy(have_keys)] = copy(states.dists)
+    end
+    dist_cache[have_keys]
+    # @timeit to "floyd_warshall" states = floyd_warshall_shortest_paths(g)
+    # states.dists
+end
+
+function get_avail_keys(g::SimpleGraph, cur_pos, key2node, dist_cache::DistCache, have_keyse)
+    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+    get_avail_keys(dists, cur_pos, key2node)
+end
+
+function get_avail_keys(dists::Array{Int, 2}, cur_pos, key2node)
+    dist_from_node = dists[cur_pos, :]
+    let2dist = Dict(letter=>dist_from_node[node] for (letter, node) in key2node if dist_from_node[node] < typemax(Int))
+    let2dist
+end
+
+function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists::Array{Int, 2}, cur_node)
     next_node = key2node[next_key]
     push!(have_keys, next_key)
     # I have gathered key, adding edges for its doors
@@ -69,25 +85,23 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
 
     # draw_grid(g, key2node, door2node, cur_node)
 
-    dist_traveled = states.dists[cur_node, next_node]
-    println("keys gathered: $have_keys")
-    println("travelling from $cur_node to $next_node: $dist_traveled")
+    dist_traveled = dists[cur_node, next_node]
+    # println("keys gathered: $have_keys")
+    # println("travelling from $cur_node to $next_node: $dist_traveled")
     dist_traveled, next_node
 end
 
 # looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set, avail_keys)
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, avail_keys)
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
     have_keys = copy(have_keys)
     best_dist = typemax(Int)
     best_start_key = nothing
-    # println(avail_keys)
-    states = floyd_warshall_shortest_paths(g)
     # trying all possible keys to start with
     for key_to_start in avail_keys
-        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys)
+        @timeit to "solve_branch" dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache)
         if dist_travelled < best_dist
             best_dist = dist_travelled
             best_start_key = key_to_start
@@ -96,9 +110,15 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     best_dist
 end
 
-solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}())
+solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache())
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set)
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache)
+    cache_key = (start_node, have_keys)
+    if haskey(sol_cache, cache_key)
+        return sol_cache[cache_key]
+    end
+
+    # println("solving branch: keys: $have_keys, start: $start_node, num_edges: $(ne(g))")
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
@@ -107,38 +127,41 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     cur_node = start_node
 
     # looking which keys I can gather
-    states = floyd_warshall_shortest_paths(g)
-    avail_keys = get_avail_keys(states, start_node, key2node)
+    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+    avail_keys = get_avail_keys(dists, start_node, key2node)
     while !isempty(key2node) && length(avail_keys) == 1
         # only 1 key available
         # todo: probably run only while there is only one key, if there is more of them, go deep the recursion
         next_key = avail_keys |> keys |> first
-        dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, states, cur_node)
+        @timeit to "take_key" dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node)
         total_dist += dist_travelled
 
-        states = floyd_warshall_shortest_paths(g)
-        avail_keys = get_avail_keys(states, cur_node, key2node)
+        # println("solving branch: keys: $have_keys, start: $cur_node, num_edges: $(ne(g))")
+        @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+        avail_keys = get_avail_keys(dists, cur_node, key2node)
     end
 
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
-        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, avail_keys |> keys)
+        @timeit to "solve_branches" total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, avail_keys |> keys)
     end
     # println("dist from $start_node to end: $total_dist")
+    sol_cache[cache_key] = total_dist
     total_dist
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set)
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache)
+    # println("solving branch: keys: $have_keys, start: $start_node, num_edges: $(length(edges(g)))")
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
     have_keys = copy(have_keys)
     total_dist = 0
-    states = floyd_warshall_shortest_paths(g)
-    total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, states, start_node)
+    @timeit to "dists" dists = shortest_paths(g, dist_cache, have_keys)
+    @timeit to "take_key" total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node)
     # println("dist from $start_node to $cur_node: $total_dist")
-    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys)
+    @timeit to "solve_branch" total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache)
     # println("dist from $start_node to end: $total_dist")
     total_dist
 end
@@ -174,10 +197,14 @@ end
 
 function part1()
     g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+    to = TimerOutput()
     solve_branch(g, start_node, key2node, door2neighbors, door2node)
+    # display(to)
 end
 
-
+using BenchmarkTools
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+@time solve_branch(g, start_node, key2node, door2neighbors, door2node)
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
 #
 # have_keys = Set{Char}()
@@ -208,6 +235,6 @@ function part2()
 end
 
 println(part1())
-submit(part1(), cur_day, 1)
+# submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+# submit(part2(), cur_day, 2)
