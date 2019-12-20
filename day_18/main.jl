@@ -56,6 +56,8 @@ SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal fr
 node2coords = Dict(i => Tuple(j) for (i, j) in enumerate(CartesianIndices(data)))
 coords2node = Dict(Tuple(j) => i for (i, j) in enumerate(CartesianIndices(data)))
 
+struct TooLongPathException <: Exception end
+
 function shortest_paths(g::AbstractGraph, dist_cache::DistCache, have_keys)
     if !haskey(dist_cache, have_keys)
         states = floyd_warshall_shortest_paths(g)
@@ -101,27 +103,39 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
 end
 
 # looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, avail_keys)
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, avail_keys)
+    # println("path_ub: $path_ub for solve_branches with keys: $have_keys")
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
     have_keys = copy(have_keys)
-    best_dist = typemax(Int)
+    best_dist = path_ub
     best_start_key = nothing
     # trying all possible keys to start with
     for key_to_start in avail_keys
-        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache)
-        if dist_travelled < best_dist
-            best_dist = dist_travelled
-            best_start_key = key_to_start
+        try
+            dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache, best_dist)
+            if dist_travelled < best_dist
+                best_dist = dist_travelled
+                best_start_key = key_to_start
+            end
+        catch err
+            if err isa TooLongPathException
+                # println("too bad solution cutoff")
+                continue
+            else
+                throw(err)
+            end
         end
     end
+    best_dist > path_ub && return typemax(Int)
     best_dist
 end
 
-solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache())
+solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), typemax(Int))
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache)
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int)
+    # println("path_ub: $path_ub with keys: $have_keys")
     cache_key = (start_node, have_keys)
     if haskey(sol_cache, cache_key)
         return sol_cache[cache_key]
@@ -139,6 +153,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     dists = shortest_paths(g, dist_cache, have_keys)
     avail_keys = get_avail_keys(dists, start_node, key2node)
     while !isempty(key2node) && length(avail_keys) == 1
+        total_dist > path_ub && return typemax(Int)
         # only 1 key available
         next_key = avail_keys |> keys |> first
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node)
@@ -152,14 +167,17 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
-        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, avail_keys |> keys)
+        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, avail_keys |> keys)
+        total_dist > path_ub && return typemax(Int)
     end
     # println("dist from $start_node to end: $total_dist")
     sol_cache[cache_key] = total_dist
+    # println("total_dist: $total_dist with keys: $have_keys")
     total_dist
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache)
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int)
+    # println("path_ub: $path_ub with keys: $have_keys")
     # println("solving branch: keys: $have_keys, start: $start_node, num_edges: $(length(edges(g)))")
     g = copy(g)
     key2node = copy(key2node)
@@ -168,9 +186,12 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     total_dist = 0
     dists = shortest_paths(g, dist_cache, have_keys)
     total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node)
+    total_dist > path_ub && return typemax(Int)
     # println("dist from $start_node to $cur_node: $total_dist")
-    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache)
+    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub)
+    total_dist > path_ub && return typemax(Int)
     # println("dist from $start_node to end: $total_dist")
+    # println("total_dist: $total_dist with keys: $have_keys")
     total_dist
 end
 
@@ -209,14 +230,23 @@ function part1()
     # display(to)
 end
 
-for vertex in vertices(g)
-    print("$vertex, $(Tuple(get_prop(g, vertex, :coords))) has neighbours: ")
-    println([Tuple(get_prop(g, i, :coords)) for i in neighbors(g, vertex)])
-end
-
 using BenchmarkTools
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node)
+
+#testing
+data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+solve_branch(g, start_node, key2node, door2neighbors, door2node) == 81
+
+data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+solve_branch(g, start_node, key2node, door2neighbors, door2node) == 132
+
+data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_node = build_graph(data)
+solve_branch(g, start_node, key2node, door2neighbors, door2node) == 136
+
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
 #
 # have_keys = Set{Char}()

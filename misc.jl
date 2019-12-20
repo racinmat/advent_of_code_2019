@@ -36,3 +36,10 @@ function test_input(day::Int)
 	end
 	data
 end
+
+function read_file(day::Int, filename)
+	data = open(joinpath("day_$day", filename)) do f
+		read(f, String)
+	end
+	data
+end
