@@ -104,7 +104,7 @@ function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, 
 end
 
 # looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, avail_keys)
+function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int, avail_keys)
     println("path_ub: $path_ub for solve_branches with keys: $(taken_order |> join)")
     g = copy(g)
     key2node = copy(key2node)
@@ -116,7 +116,7 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     # trying all possible keys to start with
     for key_to_start in avail_keys
         try
-            dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache, best_dist, taken_order)
+            dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache, best_dist, taken_order, path_so_far)
             if dist_travelled < best_dist
                 best_dist = dist_travelled
                 best_start_key = key_to_start
@@ -135,13 +135,15 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     best_dist
 end
 
-solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), typemax(Int), Vector{Char}())
+solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), typemax(Int), Vector{Char}(), 0)
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char})
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
     # println("path_ub: $path_ub with keys: $have_keys")
     cache_key = (start_node, have_keys)
     if haskey(sol_cache, cache_key)
-        return sol_cache[cache_key]
+        total_dist = sol_cache[cache_key]
+        println("total_dist to $(taken_order |> join): $(total_dist + path_so_far)")
+        return total_dist
     end
 
     # println("solving branch: keys: $have_keys, start: $start_node, num_edges: $(ne(g))")
@@ -159,7 +161,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     avail_keys = get_avail_keys(dists, start_node, key2node)
     while !isempty(key2node) && length(avail_keys) == 1
         # total_dist > path_ub && return typemax(Int)
-        total_dist > path_ub && throw(TooLongPathException())
+        # total_dist > path_ub && throw(TooLongPathException())
         # only 1 key available
         next_key = avail_keys |> keys |> first
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node, taken_order)
@@ -173,16 +175,17 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
-        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, avail_keys |> keys)
+        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
         # total_dist > path_ub && return typemax(Int)
-        total_dist > path_ub && throw(TooLongPathException())
+        # total_dist > path_ub && throw(TooLongPathException())
     end
     sol_cache[cache_key] = total_dist
     println("total_dist from $(orig_taken_order |> join) to $(taken_order |> join): $total_dist")
+    println("total_dist to $(taken_order |> join): $(total_dist + path_so_far)")
     total_dist
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char})
+function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
     # println("path_ub: $path_ub with keys: $have_keys and key_to_pick: $key_to_pick")
     g = copy(g)
     key2node = copy(key2node)
@@ -191,14 +194,15 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     taken_order = copy(taken_order)
     total_dist = 0
     dists = shortest_paths(g, dist_cache, have_keys)
-    total_dist, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
+    dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
+    total_dist += dist_travelled
     # total_dist > path_ub && return typemax(Int)
-    total_dist > path_ub && throw(TooLongPathException())
+    # total_dist > path_ub && throw(TooLongPathException())
     # println("dist from $start_node to $cur_node: $total_dist")
     # todo: check that this is working pruning
-    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order)
+    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far)
     # total_dist > path_ub && return typemax(Int)
-    total_dist > path_ub && throw(TooLongPathException())
+    # total_dist > path_ub && throw(TooLongPathException())
     # println("dist from $start_node to end: $total_dist")
     # println("total_dist: $total_dist with keys: $have_keys")
     total_dist
