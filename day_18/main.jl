@@ -134,7 +134,7 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     best_dist
 end
 
-solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), typemax(Int), Vector{Char}(), 0)
+solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), typemax(Int) ÷ 2, Vector{Char}(), 0)
 
 function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
     # println("path_ub: $path_ub with keys: $have_keys")
@@ -176,7 +176,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         # println("multiple keys available")
         # println(avail_keys)
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
-        # (total_dist + path_so_far) > path_ub && return typemax(Int)
+        # (total_dist + path_so_far) > path_ub && return typemax(Int) ÷ 2
         # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
     end
     sol_cache[cache_key] = total_dist
@@ -196,12 +196,12 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     dists = shortest_paths(g, dist_cache, have_keys)
     dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
     total_dist += dist_travelled
-    # (total_dist + path_so_far) > path_ub && return typemax(Int)
+    # (total_dist + path_so_far) > path_ub && return typemax(Int) ÷ 2
     # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
     # println("dist from $start_node to $cur_node: $total_dist")
     # todo: check that this is working pruning
     total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far)
-    # (total_dist + path_so_far) > path_ub && return typemax(Int)
+    (total_dist + path_so_far) > path_ub && return typemax(Int) ÷ 2
     # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
     # println("dist from $start_node to end: $total_dist")
     # println("total_dist: $(total_dist + path_so_far) with keys: $have_keys")
