@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -104,7 +104,7 @@ end
 
 # looking at the problem as branch and bounds ~or sth like this
 function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int, avail_keys)
-    # println("path_ub: $path_ub for solve_branches with keys: $(taken_order |> join)")
+    @debug "path_ub: $path_ub for solve_branches with keys: $(taken_order |> join)"
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
@@ -125,11 +125,11 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
         end
     end
     if shortcuts && (best_dist + path_so_far) > path_ub
-        # println("solve_branches with keys: $(taken_order |> join): $best_dist + $path_so_far > $path_ub")
+        @debug "solve_branches with keys: $(taken_order |> join): $best_dist + $path_so_far > $path_ub"
         return max_val
     end
     if shortcuts && isnothing(best_start_key)
-        # println("solve_branches: no branch is feasible")
+        @debug "solve_branches: no branch is feasible"
         return max_val
     end
 
@@ -140,23 +140,15 @@ end
 solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), max_val, Vector{Char}(), 0)
 
 function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
-    # println("path_ub: $path_ub with keys: $(have_keys |> join)")
+    @debug "path_ub: $path_ub with keys: $(have_keys |> join)"
     have_keys = copy(have_keys)
 
     cache_key = (start_node, have_keys)
     if haskey(sol_cache, cache_key)
         total_dist = sol_cache[cache_key]
-        # if taken_order |> join == "bdae"
-        #     print("boi")
-        # end
-        # println("total_dist to $(taken_order |> join): hit cache: $(total_dist + path_so_far)")
         return total_dist
     end
 
-    # if cache_key == (7, Set(['d', 'a', 'e', 'b']))
-    #     println("boi")
-    # end
-    # println("solving branch: keys: $have_keys, start: $start_node, num_edges: $(ne(g))")
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
@@ -174,7 +166,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node, taken_order)
         total_dist += dist_travelled
         if shortcuts && (total_dist + path_so_far) > path_ub
-            # println("solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub")
+            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
         end
         # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
@@ -188,12 +180,13 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         # println("multiple keys available")
         # println(avail_keys)
         if shortcuts && minimum(values(avail_keys)) > (path_ub - path_so_far)
+            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
         end
 
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
         if shortcuts && (total_dist + path_so_far) > path_ub
-            # println("solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub")
+            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
         end
         # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
@@ -208,7 +201,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
 end
 
 function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
-    # println("path_ub: $path_ub with keys: $(have_keys |> join) and key_to_pick: $key_to_pick")
+    @debug "path_ub: $path_ub with keys: $(have_keys |> join) and key_to_pick: $key_to_pick"
     g = copy(g)
     key2node = copy(key2node)
     door2node = copy(door2node)
@@ -219,7 +212,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
     total_dist += dist_travelled
     if shortcuts && (total_dist + path_so_far) > path_ub
-        # println("solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub")
+        println("solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub")
         return max_val
     end
     # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
@@ -227,7 +220,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     # todo: check that this is working pruning
     total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far)
     if shortcuts && (total_dist + path_so_far) > path_ub
-        # println("solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub")
+        @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
         return max_val
     end
     # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
@@ -276,10 +269,15 @@ using BenchmarkTools
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node)
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
+# global_logger(SimpleLogger(stdout, Logging.Debug))
+# SimpleLogger(stdout, Logging.Info)
+
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
+ENV["JULIA_DEBUG"] = "all"
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 44
+ENV["JULIA_DEBUG"] = ""
 shortcuts = false
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 shortcuts = true
