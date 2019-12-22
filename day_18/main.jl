@@ -111,8 +111,7 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
     door2node = copy(door2node)
     have_keys = copy(have_keys)
     taken_order = copy(taken_order)
-    # best_dist = path_ub
-    best_dist = path_ub - path_so_far   # todo: instead of above row, try this and benchmark it
+    best_dist = shortcuts ? path_ub - path_so_far : max_val
     best_start_key = nothing
     # trying all possible keys to start with
     for key_to_start in avail_keys
@@ -125,7 +124,7 @@ function solve_branches(g, start_node, key2node, door2neighbors, door2node, have
             # println("path_ub: $best_dist for solve_branches with keys: $(taken_order |> join)")
         end
     end
-    if shortcuts && (best_dist + path_so_far) > path_ub
+    if shortcuts && (best_dist + path_so_far) >= path_ub
         @debug "solve_branches with keys: $(taken_order |> join): $best_dist + $path_so_far > $path_ub"
         return max_val
     end
@@ -166,7 +165,6 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         next_key = avail_keys |> keys |> first
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node, taken_order)
         total_dist += dist_travelled
-        @debug "shortcuts: $shortcuts"
         if shortcuts && (total_dist + path_so_far) > path_ub
             @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
@@ -181,13 +179,12 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
-        if shortcuts && minimum(values(avail_keys)) > (path_ub - path_so_far)
-            @debug "no branch is feasible, all paths too long"
+        if shortcuts && minimum(values(avail_keys)) >= (path_ub - path_so_far)
+            @debug "no branch is better, all paths too long"
             return max_val
         end
 
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
-        @debug "shortcuts: $shortcuts"
         if shortcuts && (total_dist + path_so_far) > path_ub
             @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
@@ -272,18 +269,49 @@ using BenchmarkTools
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node)
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
+function simple_fmt(level, _module, group, id, file, line)
+    color = Logging.default_logcolor(level)
+    prefix = (level == Logging.Warn ? "Warning" : string(level))*':'
+    suffix = "line: $line"
+    color, prefix, suffix
+end
+
+function try_logging()
+    with_logger(my_debug_logger) do
+    # with_logger(global_logger()) do
+        do_log()
+    end
+    # do_log()
+end
+
+function do_log()
+    @debug "oh hi mark"
+end
+
+base_stream = global_logger().stream
+
+my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simple_fmt, show_limited=true, right_justify=100)
+
+try_logging()
+do_log()
+
 # global_logger(SimpleLogger(stdout, Logging.Debug))
 # SimpleLogger(stdout, Logging.Info)
+
+shortcuts = false
+shortcuts = true
+with_logger(my_debug_logger) do
+    solve_branch(g, start_node, key2node, door2neighbors, door2node)
+end
+
 
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
-verbose = true
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 44
-verbose = false
 shortcuts = false
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
-const shortcuts = true
+shortcuts = true
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
