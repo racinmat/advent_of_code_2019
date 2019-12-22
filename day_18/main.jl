@@ -165,6 +165,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         next_key = avail_keys |> keys |> first
         dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node, taken_order)
         total_dist += dist_travelled
+        @debug "shortcuts: $shortcuts"
         if shortcuts && (total_dist + path_so_far) > path_ub
             @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
@@ -180,11 +181,13 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         # println("multiple keys available")
         # println(avail_keys)
         if shortcuts && minimum(values(avail_keys)) > (path_ub - path_so_far)
-            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
+            @debug shortcuts
+            @debug "no branch is feasible, all paths too long"
             return max_val
         end
 
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
+        @debug "shortcuts: $shortcuts"
         if shortcuts && (total_dist + path_so_far) > path_ub
             @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
@@ -212,7 +215,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
     total_dist += dist_travelled
     if shortcuts && (total_dist + path_so_far) > path_ub
-        println("solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub")
+        @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
         return max_val
     end
     # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
