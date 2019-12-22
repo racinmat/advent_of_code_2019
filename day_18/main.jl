@@ -56,8 +56,9 @@ SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal fr
 const max_val = typemax(Int) ÷ 2
 struct TooLongPathException <: Exception end
 
-const shortcuts = false
-const shortcuts = true
+# can't be const if I want to change it, dut
+shortcuts = false
+shortcuts = true
 
 function shortest_paths(g::AbstractGraph, dist_cache::DistCache, have_keys)
     if !haskey(dist_cache, have_keys)
@@ -181,7 +182,6 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         # println("multiple keys available")
         # println(avail_keys)
         if shortcuts && minimum(values(avail_keys)) > (path_ub - path_so_far)
-            @debug shortcuts
             @debug "no branch is feasible, all paths too long"
             return max_val
         end
@@ -278,12 +278,12 @@ using BenchmarkTools
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
-ENV["JULIA_DEBUG"] = "all"
+verbose = true
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 44
-ENV["JULIA_DEBUG"] = ""
+verbose = false
 shortcuts = false
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
-shortcuts = true
+const shortcuts = true
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
