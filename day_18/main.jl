@@ -185,7 +185,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
         end
 
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
-        if shortcuts && (total_dist + path_so_far) > path_ub
+        if shortcuts && (total_dist + path_so_far) >= path_ub
             @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
             return max_val
         end
@@ -211,7 +211,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     dists = shortest_paths(g, dist_cache, have_keys)
     dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
     total_dist += dist_travelled
-    if shortcuts && (total_dist + path_so_far) > path_ub
+    if shortcuts && (total_dist + path_so_far) >= path_ub
         @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
         return max_val
     end
@@ -219,7 +219,7 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to
     # println("dist from $start_node to $cur_node: $total_dist")
     # todo: check that this is working pruning
     total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far)
-    if shortcuts && (total_dist + path_so_far) > path_ub
+    if shortcuts && (total_dist + path_so_far) >= path_ub
         @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
         return max_val
     end
