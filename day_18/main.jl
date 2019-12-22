@@ -187,6 +187,10 @@ function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_k
     if !isempty(key2node) && length(avail_keys) > 1
         # println("multiple keys available")
         # println(avail_keys)
+        if shortcuts && minimum(values(avail_keys)) > (path_ub - path_so_far)
+            return max_val
+        end
+
         total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
         if shortcuts && (total_dist + path_so_far) > path_ub
             # println("solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub")
@@ -273,17 +277,45 @@ using BenchmarkTools
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 #testing
-data = read_file(cur_day, "test_input.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 44
+shortcuts = false
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+shortcuts = true
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+
+data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
+@time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 60
+shortcuts = false
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+shortcuts = true
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+
+data = read_file(cur_day, "test_input_86.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
+@time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 86
+shortcuts = false
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+shortcuts = true
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 81
+shortcuts = false
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+shortcuts = true
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 132
+shortcuts = false
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+shortcuts = true
+@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
 data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
