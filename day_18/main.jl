@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures, Hungarian
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -38,6 +38,7 @@ function build_graph(data)
         end
     end
     # need to remap vertices, theirs numbering is changed after removal
+    full_graph = copy(g.graph)
 
     for (letter, node) in door2node
         neighbors_list = neighbors(g, node) |> collect
@@ -47,222 +48,99 @@ function build_graph(data)
         end
     end
 
-    g.graph, key2node, door2node, door2neighbors, start_node, g.vprops
+    g.graph, key2node, door2node, door2neighbors, start_node, g.vprops, full_graph
 end
 
 DistCache = Dict{Set{Char}, Array{Int, 2}}
 SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
+Dists = Array{Int, 2}
 
-const max_val = typemax(Int) ÷ 2
-struct TooLongPathException <: Exception end
+struct Node
+    taken_keys::Vector{Char}
+    graph::SimpleGraph
+    cur_pos::Int
+    dist_so_far::Int
+end
 
-# can't be const if I want to change it, dut
-shortcuts = false
-shortcuts = true
-
-function shortest_paths(g::AbstractGraph, dist_cache::DistCache, have_keys)
+function shortest_paths(node::Node, dist_cache::DistCache)
+    have_keys = Set(node.taken_keys)
     if !haskey(dist_cache, have_keys)
-        states = floyd_warshall_shortest_paths(g)
-        dist_cache[copy(have_keys)] = copy(states.dists)
+        states = floyd_warshall_shortest_paths(node.graph)
+        dist_cache[have_keys] = copy(states.dists)
     end
     dist_cache[have_keys]
 end
 
-function get_avail_keys(g::AbstractGraph, cur_pos, key2node, dist_cache::DistCache, have_keyse)
-    dists = shortest_paths(g, dist_cache, have_keys)
-    get_avail_keys(dists, cur_pos, key2node)
-end
-
-function get_avail_keys(dists::Array{Int, 2}, cur_pos, key2node)
+function get_avail_keys(dists::Array{Int, 2}, node::Node, key2node)
+    cur_pos = node.cur_pos
     dist_from_node = dists[cur_pos, :]
     let2dist = Dict(letter=>dist_from_node[node] for (letter, node) in key2node if dist_from_node[node] < typemax(Int))
     let2dist
 end
 
-function take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists::Array{Int, 2}, cur_node, taken_order::Vector{Char})
+function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node)
     next_node = key2node[next_key]
-    push!(have_keys, next_key)
-    push!(taken_order, next_key)
-    # I have gathered key, adding edges for its doors
+    next_taken_keys = copy(node.taken_keys)
+    next_graph = copy(node.graph)
+    push!(next_taken_keys, next_key)
     next_door = uppercase(next_key)
     if haskey(door2neighbors, next_door)   # for the last key there is no door
-        # adding edges
         for neighbor in door2neighbors[next_door]
-            add_edge!(g, door2node[next_door], neighbor)
+            add_edge!(next_graph, door2node[next_door], neighbor)
         end
-        delete!(door2node, next_door)
     end
-    # removing from key2node so I keep only remaining ones
-    delete!(key2node, next_key)
-
-    # draw_grid(g, key2node, door2node, next_node)
-
-    dist_traveled = dists[cur_node, next_node]
-    # println("keys gathered: $have_keys")
-    # println("travelling from $cur_node to $next_node: $dist_traveled")
-    dist_traveled, next_node
+    Node(next_taken_keys, node.graph, next_node, node.dist_so_far + dist_traveled)
 end
 
-# looking at the problem as branch and bounds ~or sth like this
-function solve_branches(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int, avail_keys)
-    @debug "path_ub: $path_ub for solve_branches with keys: $(taken_order |> join)"
-    g = copy(g)
-    key2node = copy(key2node)
-    door2node = copy(door2node)
-    have_keys = copy(have_keys)
-    taken_order = copy(taken_order)
-    best_dist = shortcuts ? path_ub - path_so_far : max_val
-    best_start_key = nothing
-    # trying all possible keys to start with
-    for key_to_start in avail_keys
-        # todo: in the setting upper bound, make it as min(best_dist + path_so_far, path_ub) instead of best_dist + path_so_far
-        # upper_bound = mini(best_dist + path_so_far, path_ub)
-        dist_travelled = solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_start, have_keys, dist_cache, sol_cache, best_dist + path_so_far, taken_order, path_so_far)
-        if dist_travelled < best_dist
-            best_dist = dist_travelled
-            best_start_key = key_to_start
-            # println("path_ub: $best_dist for solve_branches with keys: $(taken_order |> join)")
-        end
+function heuristic(node::Node, key2node, full_dists)
+    nodes_to_go = [i for i in values(key2node) if i ∉ node.taken_keys]
+    push!(nodes_to_go, node.cur_pos)
+    keys_dists = full_dists[nodes_to_go, nodes_to_go]
+    max_val = maximum(keys_dists)   # maximum dist with some multipúlicative margin
+    for i in 1:length(nodes_to_go)
+        keys_dists[i, i] = max_val * 100
     end
-    if shortcuts && (best_dist + path_so_far) >= path_ub
-        @debug "solve_branches with keys: $(taken_order |> join): $best_dist + $path_so_far > $path_ub"
-        return max_val
-    end
-    if shortcuts && isnothing(best_start_key)
-        @debug "solve_branches: no branch is feasible"
-        return max_val
-    end
-
-    # (best_dist + path_so_far) > path_ub && throw(TooLongPathException())
-    best_dist
+    minimum_match_cost = Hungarian.hungarian(keys_dists)[2]
+    minimum_match_cost
 end
 
-solve_branch(g, start_node, key2node, door2neighbors, door2node) = solve_branch(g, start_node, key2node, door2neighbors, door2node, Set{Char}(), DistCache(), SolCache(), max_val, Vector{Char}(), 0)
-
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
-    @debug "path_ub: $path_ub with keys: $(have_keys |> join)"
-    have_keys = copy(have_keys)
-
-    cache_key = (start_node, have_keys)
-    if haskey(sol_cache, cache_key)
-        total_dist = sol_cache[cache_key]
-        return total_dist
-    end
-
-    g = copy(g)
-    key2node = copy(key2node)
-    door2node = copy(door2node)
-    orig_taken_order = copy(taken_order)
-    taken_order = copy(taken_order)
-    total_dist = 0
-    cur_node = start_node
-
-    # looking which keys I can gather
-    dists = shortest_paths(g, dist_cache, have_keys)
-    avail_keys = get_avail_keys(dists, start_node, key2node)
-    while !isempty(key2node) && length(avail_keys) == 1
-        # only 1 key available
-        next_key = avail_keys |> keys |> first
-        dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, next_key, dists, cur_node, taken_order)
-        total_dist += dist_travelled
-        if shortcuts && (total_dist + path_so_far) > path_ub
-            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
-            return max_val
-        end
-        # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
-
-        # println("solving branch: keys: $have_keys, start: $cur_node, num_edges: $(ne(g))")
-        dists = shortest_paths(g, dist_cache, have_keys)
-        avail_keys = get_avail_keys(dists, cur_node, key2node)
-    end
-
-    if !isempty(key2node) && length(avail_keys) > 1
-        # println("multiple keys available")
-        # println(avail_keys)
-        if shortcuts && minimum(values(avail_keys)) >= (path_ub - path_so_far)
-            @debug "no branch is better, all paths too long"
-            return max_val
-        end
-
-        total_dist += solve_branches(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far, avail_keys |> keys)
-        if shortcuts && (total_dist + path_so_far) >= path_ub
-            @debug "solve_branch with keys: $(have_keys |> join): $total_dist + $path_so_far > $path_ub"
-            return max_val
-        end
-        # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
-    end
-    # if cache_key == (7, Set(['d', 'a', 'e', 'b']))
-    #     println("boi")
-    # end
-    sol_cache[cache_key] = total_dist
-    # println("total_dist from $(orig_taken_order |> join) to $(taken_order |> join): $total_dist")
-    # println("total_dist to $(taken_order |> join): $(total_dist + path_so_far)")
-    total_dist
+function get_neighbors(node::Node, dist_cache, key2node, door2neighbors, door2node)
+    dists = shortest_paths(node, dist_cache)
+    avail_keys = get_avail_keys(dists, node, key2node)
+    neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node)) for (letter, dist) in avail_keys]
+    neighbors
 end
 
-function solve_branch(g, start_node, key2node, door2neighbors, door2node, key_to_pick, have_keys::Set{Char}, dist_cache::DistCache, sol_cache::SolCache, path_ub::Int, taken_order::Vector{Char}, path_so_far::Int)
-    @debug "path_ub: $path_ub with keys: $(have_keys |> join) and key_to_pick: $key_to_pick"
-    g = copy(g)
-    key2node = copy(key2node)
-    door2node = copy(door2node)
-    have_keys = copy(have_keys)
-    taken_order = copy(taken_order)
-    total_dist = 0
-    dists = shortest_paths(g, dist_cache, have_keys)
-    dist_travelled, cur_node = take_key!(g, key2node, door2neighbors, door2node, have_keys, key_to_pick, dists, start_node, taken_order)
-    total_dist += dist_travelled
-    if shortcuts && (total_dist + path_so_far) >= path_ub
-        @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
-        return max_val
-    end
-    # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
-    # println("dist from $start_node to $cur_node: $total_dist")
-    # todo: check that this is working pruning
-    total_dist += solve_branch(g, cur_node, key2node, door2neighbors, door2node, have_keys, dist_cache, sol_cache, path_ub, taken_order, total_dist + path_so_far)
-    if shortcuts && (total_dist + path_so_far) >= path_ub
-        @debug "solve_branch with keys: $(have_keys |> join) and key_to_pick: $key_to_pick: $total_dist + $path_so_far > $path_ub"
-        return max_val
-    end
-    # (total_dist + path_so_far) > path_ub && throw(TooLongPathException())
-    # println("dist from $start_node to end: $total_dist")
-    # println("total_dist: $(total_dist + path_so_far) with keys: $have_keys")
-    total_dist
-end
+function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    dist_cache = DistCache()
+    sol_cache = SolCache()
+    open_nodes = PriorityQueue{Node, Int}()
+    closed_nodes = Set{Node}()
+    start_node = Node([], copy(g), start_pos, 0)
+    full_dists = floyd_warshall_shortest_paths(full_graph).dists
 
-function draw_grid(g, key2node, door2node, cur_node)
-    data_to_print = copy(data)
-    for (i, j) in enumerate(CartesianIndices(data))
-        if i ∈ values(key2node)
-            for (letter, node) in key2node
-                if i == node
-                    data_to_print[j] = letter
-                end
+    enqueue!(open_nodes, start_node, 1)
+    while !isempty(open_nodes)
+        cur_node = dequeue!(open_nodes)
+        if length(cur_node.taken_keys) == length(key2node)
+            return cur_node.dist_so_far
+        end
+        for (dist, neighbor) in get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
+            total_cost = cur_node.dist_so_far
+            f = neighbor.dist_so_far + heuristic(neighbor, key2node, full_dists)
+            if neighbor ∉ closed_nodes
+                enqueue!(open_nodes, neighbor, f)
             end
-        elseif i ∈ values(door2node)
-            for (letter, node) in door2node
-                if i == node
-                    data_to_print[j] = letter
-                end
-            end
-        elseif i == cur_node
-            data_to_print[j] = '@'
-        elseif degree(g, i) == 0
-            data_to_print[j] = '#'
-        elseif degree(g, i) > 0
-            data_to_print[j] = '.'
+            # todo: add checking closed list
         end
+        push!(closed_nodes, cur_node)
     end
-    for i in 1:size(data_to_print)[1]
-        println(join(data_to_print[i, :]))
-    end
-    println()
 end
 
 function part1()
-    g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
-    solve_branch(g, start_node, key2node, door2neighbors, door2node)
-    #44 is ok answer
-    # display(to)
+    g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
+    a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    # solve_branch(g, start_pos, key2node, door2neighbors, door2node)
 end
 
 using BenchmarkTools
@@ -304,7 +182,15 @@ with_logger(my_debug_logger) do
     solve_branch(g, start_node, key2node, door2neighbors, door2node)
 end
 
+a = PriorityQueue{Char, Int}()
+enqueue!(a, 'a', Int('a'))
+enqueue!(a, 'b', Int('b'))
+enqueue!(a, 'c', Int('c'))
+enqueue!(a, 'd', Int('d'))
 
+'a' ∈ keys(a)
+haskey(a, 'a')
+enqueue!(a, 'a', Int('a') + 5)
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
