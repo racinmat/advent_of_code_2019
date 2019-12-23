@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures, Hungarian
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -53,6 +53,7 @@ end
 
 DistCache = Dict{Set{Char}, Array{Int, 2}}
 HeurCache = Dict{Vector{Int}, Int}
+GraphCache = Dict{Set{Char}, AbstractGraph}
 SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
 Dists = Array{Int, 2}
 
@@ -79,17 +80,23 @@ function get_avail_keys(dists::Array{Int, 2}, node::Node, key2node)
     let2dist
 end
 
-function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node)
+function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node, graph_cache)
     next_node = key2node[next_key]
     @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
-    @timeit to "copy(node.graph)" next_graph = copy(node.graph)
+    # copying graph is costly, both time and memory-wise
     push!(next_taken_keys, next_key)
-    @timeit to "uppercase(next_key))" next_door = uppercase(next_key)
-    @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
-        for neighbor in door2neighbors[next_door]
-            add_edge!(next_graph, door2node[next_door], neighbor)
+    cache_key = Set(next_taken_keys)
+    if !haskey(graph_cache, cache_key)
+        @timeit to "copy(node.graph)" next_graph = copy(node.graph)
+        @timeit to "uppercase(next_key))" next_door = uppercase(next_key)
+        @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
+            for neighbor in door2neighbors[next_door]
+                add_edge!(next_graph, door2node[next_door], neighbor)
+            end
         end
+        graph_cache[cache_key] = next_graph
     end
+    next_graph = graph_cache[cache_key]
     Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
 end
 
@@ -110,10 +117,10 @@ end
 #     length(key2node) - length(node.taken_keys)
 # end
 
-function get_neighbors(node::Node, dist_cache, key2node, door2neighbors, door2node)
+function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neighbors, door2node)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    @timeit to "build_neighbor arr" neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node)) for (letter, dist) in avail_keys]
+    @timeit to "build_neighbor arr" neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache)) for (letter, dist) in avail_keys]
     neighbors
 end
 
@@ -122,6 +129,7 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     dist_cache = DistCache()
     sol_cache = SolCache()
     heur_cache = HeurCache()
+    graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     start_node = Node([], copy(g), start_pos, 0)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
@@ -138,7 +146,7 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
         if length(cur_node.taken_keys) == length(key2node)
             return cur_node.dist_so_far
         end
-        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
+        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node, door2neighbors, door2node)
         for (dist, neighbor) in node_neighbors
             @timeit to "calc_heuristic" h_val = heuristic(neighbor, key2node, full_dists, heur_cache)
             f = neighbor.dist_so_far + h_val

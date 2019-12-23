@@ -168,12 +168,6 @@ git-tree-sha1 = "e3ead4211073d4117a0d2ef7d1efc5c8092c8412"
 uuid = "a2bd30eb-e257-5431-a919-1863eab51364"
 version = "0.4.0"
 
-[[Hungarian]]
-deps = ["DelimitedFiles", "LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "ce3e681b362088b1d7adf8eb64170dfa4b820b24"
-uuid = "e91730f6-4275-51fb-a7a0-7064cfbd3b39"
-version = "0.4.0"
-
 [[IdentityRanges]]
 deps = ["OffsetArrays", "Test"]
 git-tree-sha1 = "b8c36c6083fd14e2a82c5974225702126e894f23"
