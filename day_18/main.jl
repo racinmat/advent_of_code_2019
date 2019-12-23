@@ -52,6 +52,7 @@ function build_graph(data)
 end
 
 DistCache = Dict{Set{Char}, Array{Int, 2}}
+HeurCache = Dict{Vector{Int}, Int}
 SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
 Dists = Array{Int, 2}
 
@@ -92,14 +93,17 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
     Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
 end
 
-# todo: try max over rows/columns after assigning big number instead of and prolly it would work?
-function heuristic(node::Node, key2node, full_dists)
+function heuristic(node::Node, key2node, full_dists, heur_cache)
 #     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
     @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
-    @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
-    @timeit to "find min_rows" min_rows = minimum(keys_dists, dims=1)
-    min_rows |> sum
+    nodes_to_go = sort(nodes_to_go)
+    if !haskey(heur_cache, nodes_to_go)
+        @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
+        @timeit to "find min_rows sum" min_rows_sum = minimum(keys_dists, dims=1) |> sum
+        heur_cache[nodes_to_go] = min_rows_sum
+    end
+    heur_cache[nodes_to_go]
 end
 
 # function heuristic(node::Node, key2node, full_dists)
@@ -117,6 +121,7 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     # from the tree-like structure of greaph being searched, I don't need closed list
     dist_cache = DistCache()
     sol_cache = SolCache()
+    heur_cache = HeurCache()
     open_nodes = PriorityQueue{Node, Int}()
     start_node = Node([], copy(g), start_pos, 0)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
@@ -135,7 +140,7 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
         end
         @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
         for (dist, neighbor) in node_neighbors
-            @timeit to "calc_heuristic" h_val = heuristic(neighbor, key2node, full_dists)
+            @timeit to "calc_heuristic" h_val = heuristic(neighbor, key2node, full_dists, heur_cache)
             f = neighbor.dist_so_far + h_val
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $h_val"
             @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
