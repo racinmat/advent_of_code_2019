@@ -96,22 +96,16 @@ end
 function heuristic(node::Node, key2node, full_dists)
 #     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
     nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+    push!(nodes_to_go, node.cur_pos)
     keys_dists = full_dists[nodes_to_go, nodes_to_go]
-    max_val = maximum(keys_dists)   # maximum dist with some multipúlicative margin
-    for i in 1:length(nodes_to_go)
-        keys_dists[i, i] = max_val * 100
-    end
-    minimum_match_cost = Hungarian.hungarian(keys_dists)[2]
-    minimum_match_cost
-
-    # heuristics below should work I hope
+    # heuristics below should wor
     min_rows = minimum(keys_dists, dims=1)
-    (min_rows - maximum(min_rows)) |> sum
+    min_rows |> sum
 end
 
-function heuristic(node::Node, key2node, full_dists)
-    length(key2node) - length(node.taken_keys)
-end
+# function heuristic(node::Node, key2node, full_dists)
+#     length(key2node) - length(node.taken_keys)
+# end
 
 function get_neighbors(node::Node, dist_cache, key2node, door2neighbors, door2node)
     dists = shortest_paths(node, dist_cache)
@@ -127,6 +121,12 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     open_nodes = PriorityQueue{Node, Int}()
     start_node = Node([], copy(g), start_pos, 0)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
+    # maximum dist with some multiplicative margin
+    max_val = maximum([i for i in full_dists if i < typemax(Int)])
+    for i in 1:size(full_dists)[1]
+        full_dists[i, i] = max_val * 100
+    end
+
 
     enqueue!(open_nodes, start_node, 1)
     while !isempty(open_nodes)
