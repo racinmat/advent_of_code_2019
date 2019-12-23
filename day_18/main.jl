@@ -65,10 +65,10 @@ struct Node
 end
 
 function shortest_paths(node::Node, dist_cache::DistCache)
-    have_keys = Set(node.taken_keys)
+    @timeit to "shortest_paths set" have_keys = Set(node.taken_keys)
     if !haskey(dist_cache, have_keys)
-        states = floyd_warshall_shortest_paths(node.graph)
-        dist_cache[have_keys] = copy(states.dists)
+        @timeit to "floyd_warshall" states = floyd_warshall_shortest_paths(node.graph)
+        @timeit to "copy(states.dists)" dist_cache[have_keys] = copy(states.dists)
     end
     dist_cache[have_keys]
 end
