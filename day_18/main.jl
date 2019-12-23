@@ -81,11 +81,11 @@ end
 
 function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node)
     next_node = key2node[next_key]
-    next_taken_keys = copy(node.taken_keys)
-    next_graph = copy(node.graph)
+    @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
+    @timeit to "copy(node.graph)" next_graph = copy(node.graph)
     push!(next_taken_keys, next_key)
-    next_door = uppercase(next_key)
-    if haskey(door2neighbors, next_door)   # for the last key there is no door
+    @timeit to "uppercase(next_key))" next_door = uppercase(next_key)
+    @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
         for neighbor in door2neighbors[next_door]
             add_edge!(next_graph, door2node[next_door], neighbor)
         end
@@ -95,9 +95,9 @@ end
 
 function heuristic(node::Node, key2node, full_dists, heur_cache)
 #     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
+# todo: try out if sorting kaes sense, seems like takes lots of time?
     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
     @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
-    nodes_to_go = sort(nodes_to_go)
     if !haskey(heur_cache, nodes_to_go)
         @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
         @timeit to "find min_rows sum" min_rows_sum = minimum(keys_dists, dims=1) |> sum
