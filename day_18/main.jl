@@ -95,11 +95,10 @@ end
 # todo: try max over rows/columns after assigning big number instead of and prolly it would work?
 function heuristic(node::Node, key2node, full_dists)
 #     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
-    nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
-    push!(nodes_to_go, node.cur_pos)
-    keys_dists = full_dists[nodes_to_go, nodes_to_go]
-    # heuristics below should wor
-    min_rows = minimum(keys_dists, dims=1)
+    @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+    @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
+    @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
+    @timeit to "find min_rows" min_rows = minimum(keys_dists, dims=1)
     min_rows |> sum
 end
 
@@ -108,9 +107,9 @@ end
 # end
 
 function get_neighbors(node::Node, dist_cache, key2node, door2neighbors, door2node)
-    dists = shortest_paths(node, dist_cache)
-    avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node)) for (letter, dist) in avail_keys]
+    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
+    @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
+    @timeit to "build_neighbor arr" neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node)) for (letter, dist) in avail_keys]
     neighbors
 end
 
@@ -127,19 +126,19 @@ function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
         full_dists[i, i] = max_val * 100
     end
 
-
     enqueue!(open_nodes, start_node, 1)
     while !isempty(open_nodes)
-        cur_node = dequeue!(open_nodes)
+        @timeit to "dequeue" cur_node = dequeue!(open_nodes)
         @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
         if length(cur_node.taken_keys) == length(key2node)
             return cur_node.dist_so_far
         end
-        for (dist, neighbor) in get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
-            h_val = heuristic(neighbor, key2node, full_dists)
+        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
+        for (dist, neighbor) in node_neighbors
+            @timeit to "calc_heuristic" h_val = heuristic(neighbor, key2node, full_dists)
             f = neighbor.dist_so_far + h_val
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $h_val"
-            enqueue!(open_nodes, neighbor, f)
+            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
         end
     end
 end
@@ -162,6 +161,10 @@ my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simpl
 with_logger(my_debug_logger) do
     a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 end
+
+to = TimerOutput()
+a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+display(to)
 
 using BenchmarkTools
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node)
