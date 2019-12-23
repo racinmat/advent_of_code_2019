@@ -93,6 +93,7 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
 end
 
 function heuristic(node::Node, key2node, full_dists)
+    # pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
     nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
     push!(nodes_to_go, node.cur_pos)
     keys_dists = full_dists[nodes_to_go, nodes_to_go]
@@ -158,54 +159,50 @@ using BenchmarkTools
 @time solve_branch(g, start_node, key2node, door2neighbors, door2node)
 @btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
 
-key_nodes = key2node |> values |> collect
 full_dists = floyd_warshall_shortest_paths(full_graph).dists
 key_dists = full_dists[key_nodes, key_nodes]
-seq = "dcabeofkl"
+# seq = "acidgbfeh"
+seq = "acfidgbeh"
+[full_dists[key2node[seq[i-1]], key2node[seq[i]]] for i in 2:length(seq)]
 [full_dists[key2node[seq[i-1]], key2node[seq[i]]] for i in 2:length(seq)] |> sum
+full_dists[start_pos, key2node[seq[1]]]
 # print lengths of path for some sequence
 
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 44
 @btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 60
 @btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_72.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 72
 @btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_76.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 76
 @btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 81
 @btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_86.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
-@time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 86
-shortcuts = false
-@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
-shortcuts = true
-@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
+@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 86
+@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
-@time solve_branch(g, start_node, key2node, door2neighbors, door2node) == 132
-shortcuts = false
-@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
-shortcuts = true
-@btime solve_branch(g, start_node, key2node, door2neighbors, door2node)
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
+@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 132
+@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_node, vprops = build_graph(data)
