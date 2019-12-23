@@ -92,20 +92,22 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
     Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
 end
 
-# function heuristic(node::Node, key2node, full_dists)
+# todo: try max over rows/columns after assigning big number instead of and prolly it would work?
+function heuristic(node::Node, key2node, full_dists)
 #     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
-#     nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
-#     nodes_to_go = [j for (i, j) in key2node if i ∉ ['a','c','f','i','d','g','b']]
-#     push!(nodes_to_go, node.cur_pos)
-#     push!(nodes_to_go, key2node['b'])
-#     keys_dists = full_dists[nodes_to_go, nodes_to_go]
-#     max_val = maximum(keys_dists)   # maximum dist with some multipúlicative margin
-#     for i in 1:length(nodes_to_go)
-#         keys_dists[i, i] = max_val * 100
-#     end
-#     minimum_match_cost = Hungarian.hungarian(keys_dists)[2]
-#     minimum_match_cost
-# end
+    nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+    keys_dists = full_dists[nodes_to_go, nodes_to_go]
+    max_val = maximum(keys_dists)   # maximum dist with some multipúlicative margin
+    for i in 1:length(nodes_to_go)
+        keys_dists[i, i] = max_val * 100
+    end
+    minimum_match_cost = Hungarian.hungarian(keys_dists)[2]
+    minimum_match_cost
+
+    # heuristics below should work I hope
+    min_rows = minimum(keys_dists, dims=1)
+    (min_rows - maximum(min_rows)) |> sum
+end
 
 function heuristic(node::Node, key2node, full_dists)
     length(key2node) - length(node.taken_keys)
