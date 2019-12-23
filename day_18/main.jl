@@ -89,11 +89,11 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
             add_edge!(next_graph, door2node[next_door], neighbor)
         end
     end
-    Node(next_taken_keys, node.graph, next_node, node.dist_so_far + dist_traveled)
+    Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
 end
 
 function heuristic(node::Node, key2node, full_dists)
-    nodes_to_go = [i for i in values(key2node) if i ∉ node.taken_keys]
+    nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
     push!(nodes_to_go, node.cur_pos)
     keys_dists = full_dists[nodes_to_go, nodes_to_go]
     max_val = maximum(keys_dists)   # maximum dist with some multipúlicative margin
@@ -106,41 +106,52 @@ end
 
 function get_neighbors(node::Node, dist_cache, key2node, door2neighbors, door2node)
     dists = shortest_paths(node, dist_cache)
-    avail_keys = get_avail_keys(dists, node, key2node)
+    avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
     neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node)) for (letter, dist) in avail_keys]
     neighbors
 end
 
 function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    # from the tree-like structure of greaph being searched, I don't need closed list
     dist_cache = DistCache()
     sol_cache = SolCache()
     open_nodes = PriorityQueue{Node, Int}()
-    closed_nodes = Set{Node}()
     start_node = Node([], copy(g), start_pos, 0)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
 
     enqueue!(open_nodes, start_node, 1)
     while !isempty(open_nodes)
         cur_node = dequeue!(open_nodes)
+        @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
         if length(cur_node.taken_keys) == length(key2node)
             return cur_node.dist_so_far
         end
         for (dist, neighbor) in get_neighbors(cur_node, dist_cache, key2node, door2neighbors, door2node)
-            total_cost = cur_node.dist_so_far
-            f = neighbor.dist_so_far + heuristic(neighbor, key2node, full_dists)
-            if neighbor ∉ closed_nodes
-                enqueue!(open_nodes, neighbor, f)
-            end
-            # todo: add checking closed list
+            h_val = heuristic(neighbor, key2node, full_dists)
+            f = neighbor.dist_so_far + h_val
+            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $h_val"
+            enqueue!(open_nodes, neighbor, f)
         end
-        push!(closed_nodes, cur_node)
     end
+end
+
+function simple_fmt(level, _module, group, id, file, line)
+    color = Logging.default_logcolor(level)
+    prefix = (level == Logging.Warn ? "Warning" : string(level))*':'
+    suffix = "line: $line"
+    color, prefix, suffix
 end
 
 function part1()
     g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
     a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     # solve_branch(g, start_pos, key2node, door2neighbors, door2node)
+end
+
+base_stream = global_logger().stream
+my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simple_fmt, show_limited=true, right_justify=100)
+with_logger(my_debug_logger) do
+    a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 end
 
 using BenchmarkTools

@@ -1,0 +1,391 @@
+[ Debug: path_ub: 4611686018427387903 with keys:                                           line: 143
+[ Debug: path_ub: 4611686018427387903 for solve_branches with keys:                        line: 108
+[ Debug: path_ub: 4611686018427387903 with keys:  and key_to_pick: g                       line: 204
+[ Debug: path_ub: 4611686018427387903 with keys: g                                         line: 143
+[ Debug: path_ub: 4611686018427387903 for solve_branches with keys: g                      line: 108
+[ Debug: path_ub: 4611686018427387903 with keys: g and key_to_pick: a                      line: 204
+[ Debug: path_ub: 4611686018427387903 with keys: ga                                        line: 143
+[ Debug: path_ub: 4611686018427387903 for solve_branches with keys: ga                     line: 108
+[ Debug: path_ub: 4611686018427387903 with keys: ga and key_to_pick: e                     line: 204
+[ Debug: path_ub: 4611686018427387903 with keys: gae                                       line: 143
+[ Debug: path_ub: 4611686018427387903 for solve_branches with keys: gae                    line: 108
+[ Debug: path_ub: 4611686018427387903 with keys: gae and key_to_pick: k                    line: 204
+[ Debug: path_ub: 4611686018427387903 with keys: gaek                                      line: 143
+[ Debug: path_ub: 56 with keys: gae and key_to_pick: b                                     line: 204
+[ Debug: path_ub: 56 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 56 for solve_branches with keys: gaeb                                    line: 108
+[ Debug: path_ub: 56 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 56 with keys: gadeb                                                      line: 143
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 48 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 25 + 23 > 48                    line: 223
+[ Debug: path_ub: 48 with keys: ga and key_to_pick: b                                      line: 204
+[ Debug: path_ub: 48 with keys: gab                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: gab                                     line: 108
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 48 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 24 > 48                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387914 + 13 > 48    line: 223
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 48 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: gabe                                    line: 108
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 48 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 30 + 18 > 48                    line: 223
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 48 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 30 + 18 > 48                    line: 223
+[ Debug: solve_branches with keys: gabe: 30 + 18 > 48                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 18 > 48                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387908 + 13 > 48    line: 223
+[ Debug: solve_branches with keys: gab: 35 + 13 > 48                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 13 > 48                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: b: 4611686018427387909 + 7 > 48      line: 223
+[ Debug: path_ub: 48 with keys: g and key_to_pick: b                                       line: 204
+[ Debug: path_ub: 48 with keys: gb                                                         line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: gb                                      line: 108
+[ Debug: path_ub: 48 with keys: gb and key_to_pick: d                                      line: 204
+[ Debug: path_ub: 48 with keys: gdb                                                        line: 143
+[ Debug: solve_branch with keys: gdaekb: 36 + 20 > 48                                      line: 169
+[ Debug: solve_branch with keys: gdb and key_to_pick: d: 4611686018427387914 + 9 > 48      line: 223
+[ Debug: path_ub: 48 with keys: gb and key_to_pick: a                                      line: 204
+[ Debug: path_ub: 48 with keys: gab                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: gba                                     line: 108
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 48 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 24 > 48                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387912 + 15 > 48    line: 223
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 48 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: gbae                                    line: 108
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 48 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 42 > 48                                      line: 169
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 4611686018427387919 + 26 > 48   line: 223
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 48 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 42 > 48                                      line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 4611686018427387919 + 26 > 48   line: 223
+[ Debug: solve_branches with keys: gbae: 22 + 26 > 48                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 26 > 48                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387914 + 15 > 48    line: 223
+[ Debug: solve_branches with keys: gba: 33 + 15 > 48                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 15 > 48                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: a: 4611686018427387909 + 9 > 48      line: 223
+[ Debug: solve_branches with keys: gb: 39 + 9 > 48                                         line: 128
+[ Debug: solve_branch with keys: gb: 4611686018427387903 + 9 > 48                          line: 189
+[ Debug: solve_branch with keys: gb and key_to_pick: b: 4611686018427387909 + 3 > 48       line: 223
+[ Debug: path_ub: 48 with keys:  and key_to_pick: a                                        line: 204
+[ Debug: path_ub: 48 with keys: a                                                          line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: a                                       line: 108
+[ Debug: path_ub: 48 with keys: a and key_to_pick: g                                       line: 204
+[ Debug: path_ub: 48 with keys: ga                                                         line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: ag                                      line: 108
+[ Debug: path_ub: 48 with keys: ga and key_to_pick: e                                      line: 204
+[ Debug: path_ub: 48 with keys: gae                                                        line: 143
+[ Debug: solve_branch with keys: gae and key_to_pick: e: 41 + 7 > 48                       line: 223
+[ Debug: path_ub: 48 with keys: ga and key_to_pick: b                                      line: 204
+[ Debug: path_ub: 48 with keys: gab                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: agb                                     line: 108
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 48 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 24 > 48                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387914 + 13 > 48    line: 223
+[ Debug: path_ub: 48 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 48 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: agbe                                    line: 108
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 48 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 30 + 18 > 48                    line: 223
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 48 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 30 + 18 > 48                    line: 223
+[ Debug: solve_branches with keys: agbe: 30 + 18 > 48                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 18 > 48                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387908 + 13 > 48    line: 223
+[ Debug: solve_branches with keys: agb: 35 + 13 > 48                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 13 > 48                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: b: 4611686018427387909 + 7 > 48      line: 223
+[ Debug: solve_branches with keys: ag: 41 + 7 > 48                                         line: 128
+[ Debug: solve_branch with keys: ga: 4611686018427387903 + 7 > 48                          line: 189
+[ Debug: solve_branch with keys: ga and key_to_pick: g: 4611686018427387907 + 3 > 48       line: 223
+[ Debug: path_ub: 48 with keys: a and key_to_pick: e                                       line: 204
+[ Debug: path_ub: 48 with keys: ae                                                         line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: ae                                      line: 108
+[ Debug: path_ub: 48 with keys: ae and key_to_pick: g                                      line: 204
+[ Debug: path_ub: 48 with keys: gae                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: aeg                                     line: 108
+[ Debug: path_ub: 48 with keys: gae and key_to_pick: k                                     line: 204
+[ Debug: path_ub: 48 with keys: gaek                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 22 + 34 > 48                                      line: 169
+[ Debug: solve_branch with keys: gaek and key_to_pick: k: 4611686018427387912 + 25 > 48    line: 223
+[ Debug: path_ub: 48 with keys: gae and key_to_pick: b                                     line: 204
+[ Debug: path_ub: 48 with keys: gaeb                                                       line: 143
+[ Debug: solve_branch with keys: gaeb and key_to_pick: b: 31 + 25 > 48                     line: 223
+[ Debug: solve_branches with keys: aeg: 23 + 25 > 48                                       line: 128
+[ Debug: solve_branch with keys: gae: 4611686018427387903 + 25 > 48                        line: 189
+[ Debug: solve_branch with keys: gae and key_to_pick: g: 4611686018427387914 + 14 > 48     line: 223
+[ Debug: path_ub: 48 with keys: ae and key_to_pick: k                                      line: 204
+[ Debug: path_ub: 48 with keys: aek                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: aek                                     line: 108
+[ Debug: path_ub: 48 with keys: aek and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 48 with keys: gaek                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 17 + 39 > 48                                      line: 169
+[ Debug: solve_branch with keys: gaek and key_to_pick: g: 4611686018427387912 + 30 > 48    line: 223
+[ Debug: path_ub: 48 with keys: aek and key_to_pick: b                                     line: 204
+[ Debug: path_ub: 48 with keys: aekb                                                       line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: aekb                                    line: 108
+[ Debug: path_ub: 48 with keys: aekb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 48 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 5 + 47 > 48                                       line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: g: 4611686018427387909 + 41 > 48   line: 223
+[ Debug: path_ub: 48 with keys: aekb and key_to_pick: d                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: d: 11 + 41 > 48                    line: 215
+[ Debug: solve_branches with keys: aekb: 7 + 41 > 48                                       line: 128
+[ Debug: solve_branch with keys: aekb: 4611686018427387903 + 41 > 48                       line: 189
+[ Debug: solve_branch with keys: aekb and key_to_pick: b: 4611686018427387914 + 30 > 48    line: 223
+[ Debug: solve_branches with keys: aek: 18 + 30 > 48                                       line: 128
+[ Debug: solve_branch with keys: aek: 4611686018427387903 + 30 > 48                        line: 189
+[ Debug: solve_branch with keys: aek and key_to_pick: k: 4611686018427387919 + 14 > 48     line: 223
+[ Debug: path_ub: 48 with keys: ae and key_to_pick: b                                      line: 204
+[ Debug: path_ub: 48 with keys: aeb                                                        line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: aeb                                     line: 108
+[ Debug: path_ub: 48 with keys: aeb and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 48 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 48 for solve_branches with keys: aebg                                    line: 108
+[ Debug: path_ub: 48 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 48 with keys: gadeb                                                      line: 143
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 34 > 44                                      line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 4611686018427387912 + 25 > 44   line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: adeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: aebd                                    line: 108
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadeb and key_to_pick: g: 14 + 30 > 44                    line: 223
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: k                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: k: 14 + 30 > 44                    line: 215
+[ Debug: solve_branches with keys: aebd: 14 + 30 > 44                                      line: 128
+[ Debug: solve_branch with keys: adeb: 4611686018427387903 + 30 > 44                       line: 189
+[ Debug: solve_branch with keys: adeb and key_to_pick: d: 4611686018427387914 + 19 > 44    line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: k                                     line: 204
+[ Debug: path_ub: 44 with keys: aekb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: aebk                                    line: 108
+[ Debug: path_ub: 44 with keys: aekb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gaekb and key_to_pick: g: 14 + 30 > 44                    line: 223
+[ Debug: path_ub: 44 with keys: aekb and key_to_pick: d                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: d: 14 + 30 > 44                    line: 215
+[ Debug: solve_branches with keys: aebk: 14 + 30 > 44                                      line: 128
+[ Debug: solve_branch with keys: aekb: 4611686018427387903 + 30 > 44                       line: 189
+[ Debug: solve_branch with keys: aekb and key_to_pick: k: 4611686018427387914 + 19 > 44    line: 223
+[ Debug: path_ub: 44 with keys: a and key_to_pick: b                                       line: 204
+[ Debug: path_ub: 44 with keys: ab                                                         line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: ab                                      line: 108
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: g                                      line: 204
+[ Debug: path_ub: 44 with keys: gab                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abg                                     line: 108
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 20 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387908 + 15 > 44    line: 223
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abge                                    line: 108
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 42 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 4611686018427387919 + 26 > 44   line: 223
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 42 > 44                                      line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 4611686018427387919 + 26 > 44   line: 223
+[ Debug: solve_branches with keys: abge: 18 + 26 > 44                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 26 > 44                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387914 + 15 > 44    line: 223
+[ Debug: solve_branches with keys: abg: 29 + 15 > 44                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 15 > 44                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: g: 4611686018427387909 + 9 > 44      line: 223
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: d                                      line: 204
+[ Debug: path_ub: 44 with keys: adb                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abd                                     line: 108
+[ Debug: path_ub: 44 with keys: adb and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 44 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 27 + 25 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: g: 4611686018427387908 + 20 > 44    line: 223
+[ Debug: path_ub: 44 with keys: adb and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: adeb                                                       line: 143
+[ Debug: no branch is better, all paths too long                                           line: 183
+[ Debug: solve_branch with keys: adeb and key_to_pick: e: 4611686018427387919 + 20 > 44    line: 223
+[ Debug: solve_branches with keys: abd: 24 + 20 > 44                                       line: 128
+[ Debug: solve_branch with keys: adb: 4611686018427387903 + 20 > 44                        line: 189
+[ Debug: solve_branch with keys: adb and key_to_pick: d: 4611686018427387914 + 9 > 44      line: 223
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: e                                      line: 204
+[ Debug: path_ub: 44 with keys: aeb                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abe                                     line: 108
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 44 with keys: gaeb                                                       line: 143
+[ Debug: solve_branch with keys: gaeb and key_to_pick: g: 30 + 14 > 44                     line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: adeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abed                                    line: 108
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadeb and key_to_pick: g: 14 + 30 > 44                    line: 223
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: k                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: k: 14 + 30 > 44                    line: 215
+[ Debug: solve_branches with keys: abed: 14 + 30 > 44                                      line: 128
+[ Debug: solve_branch with keys: adeb: 4611686018427387903 + 30 > 44                       line: 189
+[ Debug: solve_branch with keys: adeb and key_to_pick: d: 4611686018427387919 + 14 > 44    line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: k                                     line: 204
+[ Debug: path_ub: 44 with keys: aekb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: abek                                    line: 108
+[ Debug: path_ub: 44 with keys: aekb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gaekb and key_to_pick: g: 14 + 30 > 44                    line: 223
+[ Debug: path_ub: 44 with keys: aekb and key_to_pick: d                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: d: 14 + 30 > 44                    line: 215
+[ Debug: solve_branches with keys: abek: 14 + 30 > 44                                      line: 128
+[ Debug: solve_branch with keys: aekb: 4611686018427387903 + 30 > 44                       line: 189
+[ Debug: solve_branch with keys: aekb and key_to_pick: k: 4611686018427387919 + 14 > 44    line: 223
+[ Debug: solve_branches with keys: abe: 30 + 14 > 44                                       line: 128
+[ Debug: solve_branch with keys: aeb: 4611686018427387903 + 14 > 44                        line: 189
+[ Debug: solve_branch with keys: aeb and key_to_pick: e: 4611686018427387908 + 9 > 44      line: 223
+[ Debug: solve_branches with keys: ab: 35 + 9 > 44                                         line: 128
+[ Debug: solve_branch with keys: ab: 4611686018427387903 + 9 > 44                          line: 189
+[ Debug: solve_branch with keys: ab and key_to_pick: b: 4611686018427387909 + 3 > 44       line: 223
+[ Debug: path_ub: 44 with keys:  and key_to_pick: b                                        line: 204
+[ Debug: path_ub: 44 with keys: b                                                          line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: b                                       line: 108
+[ Debug: path_ub: 44 with keys: b and key_to_pick: g                                       line: 204
+[ Debug: path_ub: 44 with keys: gb                                                         line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bg                                      line: 108
+[ Debug: path_ub: 44 with keys: gb and key_to_pick: d                                      line: 204
+[ Debug: path_ub: 44 with keys: gdb                                                        line: 143
+[ Debug: solve_branch with keys: gdaekb: 36 + 14 > 44                                      line: 169
+[ Debug: solve_branch with keys: gdb and key_to_pick: d: 4611686018427387908 + 9 > 44      line: 223
+[ Debug: path_ub: 44 with keys: gb and key_to_pick: a                                      line: 204
+[ Debug: path_ub: 44 with keys: gab                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bga                                     line: 108
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 22 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387912 + 13 > 44    line: 223
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bgae                                    line: 108
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 40 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 4611686018427387919 + 24 > 44   line: 223
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 40 > 44                                      line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 4611686018427387919 + 24 > 44   line: 223
+[ Debug: solve_branches with keys: bgae: 20 + 24 > 44                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 24 > 44                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387914 + 13 > 44    line: 223
+[ Debug: solve_branches with keys: bga: 31 + 13 > 44                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 13 > 44                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: a: 4611686018427387907 + 9 > 44      line: 223
+[ Debug: solve_branches with keys: bg: 35 + 9 > 44                                         line: 128
+[ Debug: solve_branch with keys: gb: 4611686018427387903 + 9 > 44                          line: 189
+[ Debug: solve_branch with keys: gb and key_to_pick: g: 4611686018427387909 + 3 > 44       line: 223
+[ Debug: path_ub: 44 with keys: b and key_to_pick: d                                       line: 204
+[ Debug: path_ub: 44 with keys: db                                                         line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bd                                      line: 108
+[ Debug: path_ub: 44 with keys: db and key_to_pick: g                                      line: 204
+[ Debug: path_ub: 44 with keys: gdb                                                        line: 143
+[ Debug: solve_branch with keys: gdaekb: 31 + 19 > 44                                      line: 169
+[ Debug: solve_branch with keys: gdb and key_to_pick: g: 4611686018427387908 + 14 > 44     line: 223
+[ Debug: path_ub: 44 with keys: db and key_to_pick: a                                      line: 204
+[ Debug: path_ub: 44 with keys: dab                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bda                                     line: 108
+[ Debug: path_ub: 44 with keys: dab and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 44 with keys: gdab                                                       line: 143
+[ Debug: solve_branch with keys: gdaekb: 27 + 27 > 44                                      line: 169
+[ Debug: solve_branch with keys: gdab and key_to_pick: g: 4611686018427387907 + 23 > 44    line: 223
+[ Debug: path_ub: 44 with keys: dab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: daeb                                                       line: 143
+[ Debug: no branch is better, all paths too long                                           line: 183
+[ Debug: solve_branch with keys: daeb and key_to_pick: e: 4611686018427387914 + 23 > 44    line: 223
+[ Debug: solve_branches with keys: bda: 21 + 23 > 44                                       line: 128
+[ Debug: solve_branch with keys: dab: 4611686018427387903 + 23 > 44                        line: 189
+[ Debug: solve_branch with keys: dab and key_to_pick: a: 4611686018427387912 + 14 > 44     line: 223
+[ Debug: solve_branches with keys: bd: 30 + 14 > 44                                        line: 128
+[ Debug: solve_branch with keys: db: 4611686018427387903 + 14 > 44                         line: 189
+[ Debug: solve_branch with keys: db and key_to_pick: d: 4611686018427387914 + 3 > 44       line: 223
+[ Debug: path_ub: 44 with keys: b and key_to_pick: a                                       line: 204
+[ Debug: path_ub: 44 with keys: ab                                                         line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: ba                                      line: 108
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: g                                      line: 204
+[ Debug: path_ub: 44 with keys: gab                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bag                                     line: 108
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 32 + 18 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: d: 4611686018427387908 + 13 > 44    line: 223
+[ Debug: path_ub: 44 with keys: gab and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: gaeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bage                                    line: 108
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: d                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 40 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadeb and key_to_pick: d: 4611686018427387919 + 24 > 44   line: 223
+[ Debug: path_ub: 44 with keys: gaeb and key_to_pick: k                                    line: 204
+[ Debug: path_ub: 44 with keys: gaekb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 14 + 40 > 44                                      line: 169
+[ Debug: solve_branch with keys: gaekb and key_to_pick: k: 4611686018427387919 + 24 > 44   line: 223
+[ Debug: solve_branches with keys: bage: 20 + 24 > 44                                      line: 128
+[ Debug: solve_branch with keys: gaeb: 4611686018427387903 + 24 > 44                       line: 189
+[ Debug: solve_branch with keys: gaeb and key_to_pick: e: 4611686018427387914 + 13 > 44    line: 223
+[ Debug: solve_branches with keys: bag: 31 + 13 > 44                                       line: 128
+[ Debug: solve_branch with keys: gab: 4611686018427387903 + 13 > 44                        line: 189
+[ Debug: solve_branch with keys: gab and key_to_pick: g: 4611686018427387907 + 9 > 44      line: 223
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: d                                      line: 204
+[ Debug: path_ub: 44 with keys: adb                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bad                                     line: 108
+[ Debug: path_ub: 44 with keys: adb and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 44 with keys: gadb                                                       line: 143
+[ Debug: solve_branch with keys: gadekb: 27 + 23 > 44                                      line: 169
+[ Debug: solve_branch with keys: gadb and key_to_pick: g: 4611686018427387908 + 18 > 44    line: 223
+[ Debug: path_ub: 44 with keys: adb and key_to_pick: e                                     line: 204
+[ Debug: path_ub: 44 with keys: adeb                                                       line: 143
+[ Debug: no branch is better, all paths too long                                           line: 183
+[ Debug: solve_branch with keys: adeb and key_to_pick: e: 4611686018427387919 + 18 > 44    line: 223
+[ Debug: solve_branches with keys: bad: 26 + 18 > 44                                       line: 128
+[ Debug: solve_branch with keys: adb: 4611686018427387903 + 18 > 44                        line: 189
+[ Debug: solve_branch with keys: adb and key_to_pick: d: 4611686018427387912 + 9 > 44      line: 223
+[ Debug: path_ub: 44 with keys: ab and key_to_pick: e                                      line: 204
+[ Debug: path_ub: 44 with keys: aeb                                                        line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: bae                                     line: 108
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: g                                     line: 204
+[ Debug: path_ub: 44 with keys: gaeb                                                       line: 143
+[ Debug: solve_branch with keys: gaeb and key_to_pick: g: 30 + 20 > 44                     line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: d                                     line: 204
+[ Debug: path_ub: 44 with keys: adeb                                                       line: 143
+[ Debug: path_ub: 44 for solve_branches with keys: baed                                    line: 108
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: g                                    line: 204
+[ Debug: path_ub: 44 with keys: gadeb                                                      line: 143
+[ Debug: solve_branch with keys: gadekb: 9 + 41 > 44                                       line: 169
+[ Debug: solve_branch with keys: gadeb and key_to_pick: g: 4611686018427387908 + 36 > 44   line: 223
+[ Debug: path_ub: 44 with keys: adeb and key_to_pick: k                                    line: 204
+[ Debug: solve_branch with keys: adekb and key_to_pick: k: 14 + 36 > 44                    line: 215
+[ Debug: solve_branches with keys: baed: 8 + 36 > 44                                       line: 128
+[ Debug: solve_branch with keys: adeb: 4611686018427387903 + 36 > 44                       line: 189
+[ Debug: solve_branch with keys: adeb and key_to_pick: d: 4611686018427387919 + 20 > 44    line: 223
+[ Debug: path_ub: 44 with keys: aeb and key_to_pick: k                                     line: 204
+[ Debug: path_ub: 44 with keys: aekb                                                       line: 143
+[ Debug: no branch is better, all paths too long                                           line: 183
+[ Debug: solve_branch with keys: aekb and key_to_pick: k: 4611686018427387919 + 20 > 44    line: 223
+[ Debug: solve_branches with keys: bae: 24 + 20 > 44                                       line: 128
+[ Debug: solve_branch with keys: aeb: 4611686018427387903 + 20 > 44                        line: 189
+[ Debug: solve_branch with keys: aeb and key_to_pick: e: 4611686018427387914 + 9 > 44      line: 223
+[ Debug: solve_branches with keys: ba: 35 + 9 > 44                                         line: 128
+[ Debug: solve_branch with keys: ab: 4611686018427387903 + 9 > 44                          line: 189
+[ Debug: solve_branch with keys: ab and key_to_pick: a: 4611686018427387909 + 3 > 44       line: 223
+[ Debug: solve_branches with keys: b: 41 + 3 > 44                                          line: 128
+[ Debug: solve_branch with keys: b: 4611686018427387903 + 3 > 44                           line: 189
+[ Debug: solve_branch with keys: b and key_to_pick: b: 4611686018427387906 + 0 > 44        line: 223
