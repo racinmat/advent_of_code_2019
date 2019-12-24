@@ -1,6 +1,7 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures, SimpleWeightedGraphs
+
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -100,15 +101,30 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
     Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
 end
 
+# based on sum of distances to nearest neighbour of each node
+# function heuristic(node::Node, key2node, full_dists, heur_cache)
+# # todo: try out if sorting kaes sense, seems like takes lots of time?
+#     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+#     isempty(nodes_to_go) && return 0
+#     @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
+#     if !haskey(heur_cache, nodes_to_go)
+#         @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
+#         @timeit to "find min_rows sum" min_rows_sum = minimum(keys_dists, dims=1) |> sum
+#         heur_cache[nodes_to_go] = min_rows_sum
+#     end
+#     heur_cache[nodes_to_go]
+# end
+
+# based on minimal spanning tree
 function heuristic(node::Node, key2node, full_dists, heur_cache)
-#     pro test input 81 a node acfidgb dává heuristiku 40, což je moc, to by nemělo: fixnout
 # todo: try out if sorting kaes sense, seems like takes lots of time?
     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+    isempty(nodes_to_go) && return 0
     @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
     if !haskey(heur_cache, nodes_to_go)
         @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
-        @timeit to "find min_rows sum" min_rows_sum = minimum(keys_dists, dims=1) |> sum
-        heur_cache[nodes_to_go] = min_rows_sum
+        @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
+        heur_cache[nodes_to_go] = mst_sum
     end
     heur_cache[nodes_to_go]
 end
@@ -124,7 +140,7 @@ function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neigh
     neighbors
 end
 
-function a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     # from the tree-like structure of greaph being searched, I don't need closed list
     dist_cache = DistCache()
     sol_cache = SolCache()
@@ -165,18 +181,18 @@ end
 
 function part1()
     g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-    a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     # solve_branch(g, start_pos, key2node, door2neighbors, door2node)
 end
 
 base_stream = global_logger().stream
 my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simple_fmt, show_limited=true, right_justify=100)
 with_logger(my_debug_logger) do
-    a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 end
 
 to = TimerOutput()
-a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 display(to)
 
 using BenchmarkTools
@@ -192,45 +208,79 @@ seq = "acfidgbeh"
 full_dists[start_pos, key2node[seq[1]]]
 # print lengths of path for some sequence
 
+nodes_to_go = [j for (i, j) in key2node if i ∉ ['f']]
+push!(nodes_to_go, key2node['f'])
+nodes_to_go = sort(nodes_to_go)
+keys_dists = full_dists[nodes_to_go, nodes_to_go]
+mst = kruskal_mst(SimpleWeightedGraph(keys_dists))
+mst_sum = mst .|> (x->x.weight) |> sum
+display(nodes_to_go')
+display(keys_dists)
+display(mst)
+display(mst_sum)
+
+nodes_to_go = [j for (i, j) in key2node if i ∉ ['f', 'b', 'a']]
+push!(nodes_to_go, key2node['a'])
+nodes_to_go = sort(nodes_to_go)
+keys_dists = full_dists[nodes_to_go, nodes_to_go]
+mst = kruskal_mst(SimpleWeightedGraph(keys_dists))
+mst_sum = mst .|> (x->x.weight) |> sum
+display(nodes_to_go')
+display(keys_dists)
+display(mst)
+display(mst_sum)
+
+nodes_to_go = [j for (i, j) in key2node if i ∉ ['b', 'f', 'g', 'a', 'd']]
+push!(nodes_to_go, start_pos)
+nodes_to_go = sort(nodes_to_go)
+keys_dists = full_dists[nodes_to_go, nodes_to_go]
+mst = kruskal_mst(SimpleWeightedGraph(keys_dists))
+mst_sum = mst .|> (x->x.weight) |> sum
+display(nodes_to_go')
+display(keys_dists)
+display(mst)
+display(mst_sum)
+
+
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 44
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 44
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 60
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 60
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_72.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 72
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 72
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_76.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 76
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 76
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 81
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 81
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_86.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 86
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 86
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 132
-@btime a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 132
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
-@time a_star(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 136
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 136
 
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
 #

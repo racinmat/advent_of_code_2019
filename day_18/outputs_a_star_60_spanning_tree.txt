@@ -1,0 +1,854 @@
+[ Debug: dequeued node:  with dist_so_far: 0                           line: 163
+[ Debug: enqueing node: f with dist_so_far: 3 and h: 34                line: 171
+[ Debug: enqueing node: g with dist_so_far: 3 and h: 34                line: 171
+[ Debug: enqueing node: a with dist_so_far: 3 and h: 34                line: 171
+[ Debug: enqueing node: b with dist_so_far: 3 and h: 34                line: 171
+[ Debug: dequeued node: f with dist_so_far: 3                          line: 163
+[ Debug: enqueing node: fg with dist_so_far: 9 and h: 34               line: 171
+[ Debug: enqueing node: fa with dist_so_far: 9 and h: 34               line: 171
+[ Debug: enqueing node: fb with dist_so_far: 7 and h: 34               line: 171
+[ Debug: dequeued node: b with dist_so_far: 3                          line: 163
+[ Debug: enqueing node: bf with dist_so_far: 7 and h: 34               line: 171
+[ Debug: enqueing node: bg with dist_so_far: 9 and h: 34               line: 171
+[ Debug: enqueing node: bd with dist_so_far: 14 and h: 34              line: 171
+[ Debug: enqueing node: ba with dist_so_far: 9 and h: 34               line: 171
+[ Debug: dequeued node: a with dist_so_far: 3                          line: 163
+[ Debug: enqueing node: af with dist_so_far: 9 and h: 34               line: 171
+[ Debug: enqueing node: ag with dist_so_far: 7 and h: 34               line: 171
+[ Debug: enqueing node: ae with dist_so_far: 14 and h: 34              line: 171
+[ Debug: enqueing node: ab with dist_so_far: 9 and h: 34               line: 171
+[ Debug: dequeued node: g with dist_so_far: 3                          line: 163
+[ Debug: enqueing node: gf with dist_so_far: 9 and h: 34               line: 171
+[ Debug: enqueing node: ga with dist_so_far: 7 and h: 34               line: 171
+[ Debug: enqueing node: gb with dist_so_far: 9 and h: 34               line: 171
+[ Debug: dequeued node: fb with dist_so_far: 7                         line: 163
+[ Debug: enqueing node: fbg with dist_so_far: 13 and h: 36             line: 171
+[ Debug: enqueing node: fbd with dist_so_far: 18 and h: 36             line: 171
+[ Debug: enqueing node: fba with dist_so_far: 13 and h: 36             line: 171
+[ Debug: dequeued node: bf with dist_so_far: 7                         line: 163
+[ Debug: enqueing node: bfg with dist_so_far: 13 and h: 36             line: 171
+[ Debug: enqueing node: bfd with dist_so_far: 18 and h: 36             line: 171
+[ Debug: enqueing node: bfa with dist_so_far: 13 and h: 36             line: 171
+[ Debug: dequeued node: ga with dist_so_far: 7                         line: 163
+[ Debug: enqueing node: gaf with dist_so_far: 13 and h: 36             line: 171
+[ Debug: enqueing node: gae with dist_so_far: 18 and h: 36             line: 171
+[ Debug: enqueing node: gab with dist_so_far: 13 and h: 36             line: 171
+[ Debug: dequeued node: ag with dist_so_far: 7                         line: 163
+[ Debug: enqueing node: agf with dist_so_far: 13 and h: 36             line: 171
+[ Debug: enqueing node: age with dist_so_far: 18 and h: 36             line: 171
+[ Debug: enqueing node: agb with dist_so_far: 13 and h: 36             line: 171
+[ Debug: dequeued node: bg with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: bgf with dist_so_far: 15 and h: 34             line: 171
+[ Debug: enqueing node: bgd with dist_so_far: 14 and h: 34             line: 171
+[ Debug: enqueing node: bga with dist_so_far: 13 and h: 34             line: 171
+[ Debug: dequeued node: gb with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: gbf with dist_so_far: 13 and h: 34             line: 171
+[ Debug: enqueing node: gbd with dist_so_far: 20 and h: 34             line: 171
+[ Debug: enqueing node: gba with dist_so_far: 15 and h: 34             line: 171
+[ Debug: dequeued node: ab with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: abf with dist_so_far: 13 and h: 34             line: 171
+[ Debug: enqueing node: abg with dist_so_far: 15 and h: 34             line: 171
+[ Debug: enqueing node: abd with dist_so_far: 20 and h: 34             line: 171
+[ Debug: enqueing node: abe with dist_so_far: 14 and h: 34             line: 171
+[ Debug: dequeued node: gf with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: gfa with dist_so_far: 15 and h: 34             line: 171
+[ Debug: enqueing node: gfb with dist_so_far: 13 and h: 34             line: 171
+[ Debug: dequeued node: ba with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: baf with dist_so_far: 15 and h: 34             line: 171
+[ Debug: enqueing node: bag with dist_so_far: 13 and h: 34             line: 171
+[ Debug: enqueing node: bad with dist_so_far: 18 and h: 34             line: 171
+[ Debug: enqueing node: bae with dist_so_far: 20 and h: 34             line: 171
+[ Debug: dequeued node: fa with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: fag with dist_so_far: 13 and h: 34             line: 171
+[ Debug: enqueing node: fae with dist_so_far: 20 and h: 34             line: 171
+[ Debug: enqueing node: fab with dist_so_far: 15 and h: 34             line: 171
+[ Debug: dequeued node: fg with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: fga with dist_so_far: 13 and h: 34             line: 171
+[ Debug: enqueing node: fgb with dist_so_far: 15 and h: 34             line: 171
+[ Debug: dequeued node: af with dist_so_far: 9                         line: 163
+[ Debug: enqueing node: afg with dist_so_far: 15 and h: 34             line: 171
+[ Debug: enqueing node: afe with dist_so_far: 18 and h: 34             line: 171
+[ Debug: enqueing node: afb with dist_so_far: 13 and h: 34             line: 171
+[ Debug: dequeued node: bga with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: bgaf with dist_so_far: 19 and h: 36            line: 171
+[ Debug: enqueing node: bgad with dist_so_far: 22 and h: 36            line: 171
+[ Debug: enqueing node: bgae with dist_so_far: 24 and h: 36            line: 171
+[ Debug: dequeued node: gfb with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: gfbd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: gfba with dist_so_far: 19 and h: 36            line: 171
+[ Debug: dequeued node: bag with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: bagf with dist_so_far: 19 and h: 36            line: 171
+[ Debug: enqueing node: bagd with dist_so_far: 18 and h: 36            line: 171
+[ Debug: enqueing node: bage with dist_so_far: 24 and h: 36            line: 171
+[ Debug: dequeued node: gbf with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: gbfd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: gbfa with dist_so_far: 19 and h: 36            line: 171
+[ Debug: dequeued node: abf with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: abfg with dist_so_far: 19 and h: 36            line: 171
+[ Debug: enqueing node: abfd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: abfe with dist_so_far: 22 and h: 36            line: 171
+[ Debug: dequeued node: fag with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: fage with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: fagb with dist_so_far: 19 and h: 36            line: 171
+[ Debug: dequeued node: fga with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: fgae with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: fgab with dist_so_far: 19 and h: 36            line: 171
+[ Debug: dequeued node: afb with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: afbg with dist_so_far: 19 and h: 36            line: 171
+[ Debug: enqueing node: afbd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: afbe with dist_so_far: 18 and h: 36            line: 171
+[ Debug: dequeued node: abe with dist_so_far: 14                       line: 163
+[ Debug: enqueing node: abef with dist_so_far: 23 and h: 25            line: 171
+[ Debug: enqueing node: abeg with dist_so_far: 25 and h: 25            line: 171
+[ Debug: enqueing node: abed with dist_so_far: 30 and h: 25            line: 171
+[ Debug: enqueing node: abek with dist_so_far: 30 and h: 25            line: 171
+[ Debug: dequeued node: ae with dist_so_far: 14                        line: 163
+[ Debug: enqueing node: aef with dist_so_far: 23 and h: 29             line: 171
+[ Debug: enqueing node: aeg with dist_so_far: 25 and h: 29             line: 171
+[ Debug: enqueing node: aek with dist_so_far: 30 and h: 29             line: 171
+[ Debug: enqueing node: aeb with dist_so_far: 19 and h: 29             line: 171
+[ Debug: dequeued node: abef with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: abefg with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: abefd with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: abefk with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: aeb with dist_so_far: 19                       line: 163
+[ Debug: enqueing node: aebf with dist_so_far: 23 and h: 25            line: 171
+[ Debug: enqueing node: aebg with dist_so_far: 25 and h: 25            line: 171
+[ Debug: enqueing node: aebd with dist_so_far: 30 and h: 25            line: 171
+[ Debug: enqueing node: aebk with dist_so_far: 30 and h: 25            line: 171
+[ Debug: dequeued node: bgd with dist_so_far: 14                       line: 163
+[ Debug: enqueing node: bgdf with dist_so_far: 25 and h: 25            line: 171
+[ Debug: enqueing node: bgda with dist_so_far: 23 and h: 25            line: 171
+[ Debug: enqueing node: bgdo with dist_so_far: 30 and h: 25            line: 171
+[ Debug: dequeued node: aebf with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: aebfg with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: aebfd with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: aebfk with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: bgda with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: bgdaf with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: bgdae with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: bgdao with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: bd with dist_so_far: 14                        line: 163
+[ Debug: enqueing node: bdf with dist_so_far: 25 and h: 29             line: 171
+[ Debug: enqueing node: bdg with dist_so_far: 19 and h: 29             line: 171
+[ Debug: enqueing node: bda with dist_so_far: 23 and h: 29             line: 171
+[ Debug: enqueing node: bdo with dist_so_far: 30 and h: 29             line: 171
+[ Debug: dequeued node: bdg with dist_so_far: 19                       line: 163
+[ Debug: enqueing node: bdgf with dist_so_far: 25 and h: 25            line: 171
+[ Debug: enqueing node: bdga with dist_so_far: 23 and h: 25            line: 171
+[ Debug: enqueing node: bdgo with dist_so_far: 30 and h: 25            line: 171
+[ Debug: dequeued node: bdga with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: bdgaf with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: bdgae with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: bdgao with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: baf with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: bafg with dist_so_far: 21 and h: 36            line: 171
+[ Debug: enqueing node: bafd with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: bafe with dist_so_far: 24 and h: 36            line: 171
+[ Debug: dequeued node: gab with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: gabf with dist_so_far: 17 and h: 36            line: 171
+[ Debug: enqueing node: gabd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: gabe with dist_so_far: 18 and h: 36            line: 171
+[ Debug: dequeued node: abg with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: abgf with dist_so_far: 21 and h: 36            line: 171
+[ Debug: enqueing node: abgd with dist_so_far: 20 and h: 36            line: 171
+[ Debug: enqueing node: abge with dist_so_far: 26 and h: 36            line: 171
+[ Debug: dequeued node: gba with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: gbaf with dist_so_far: 21 and h: 36            line: 171
+[ Debug: enqueing node: gbad with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: gbae with dist_so_far: 26 and h: 36            line: 171
+[ Debug: dequeued node: agb with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: agbf with dist_so_far: 17 and h: 36            line: 171
+[ Debug: enqueing node: agbd with dist_so_far: 24 and h: 36            line: 171
+[ Debug: enqueing node: agbe with dist_so_far: 18 and h: 36            line: 171
+[ Debug: dequeued node: gfa with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: gfae with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: gfab with dist_so_far: 21 and h: 36            line: 171
+[ Debug: dequeued node: bgf with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: bgfd with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: bgfa with dist_so_far: 21 and h: 36            line: 171
+[ Debug: dequeued node: bfa with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: bfag with dist_so_far: 17 and h: 36            line: 171
+[ Debug: enqueing node: bfad with dist_so_far: 22 and h: 36            line: 171
+[ Debug: enqueing node: bfae with dist_so_far: 24 and h: 36            line: 171
+[ Debug: dequeued node: agf with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: agfe with dist_so_far: 22 and h: 36            line: 171
+[ Debug: enqueing node: agfb with dist_so_far: 17 and h: 36            line: 171
+[ Debug: dequeued node: fba with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: fbag with dist_so_far: 17 and h: 36            line: 171
+[ Debug: enqueing node: fbad with dist_so_far: 22 and h: 36            line: 171
+[ Debug: enqueing node: fbae with dist_so_far: 24 and h: 36            line: 171
+[ Debug: dequeued node: fgb with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: fgbd with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: fgba with dist_so_far: 21 and h: 36            line: 171
+[ Debug: dequeued node: afg with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: afge with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: afgb with dist_so_far: 21 and h: 36            line: 171
+[ Debug: dequeued node: fbg with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: fbgd with dist_so_far: 18 and h: 36            line: 171
+[ Debug: enqueing node: fbga with dist_so_far: 17 and h: 36            line: 171
+[ Debug: dequeued node: gaf with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: gafe with dist_so_far: 22 and h: 36            line: 171
+[ Debug: enqueing node: gafb with dist_so_far: 17 and h: 36            line: 171
+[ Debug: dequeued node: fab with dist_so_far: 15                       line: 163
+[ Debug: enqueing node: fabg with dist_so_far: 21 and h: 36            line: 171
+[ Debug: enqueing node: fabd with dist_so_far: 26 and h: 36            line: 171
+[ Debug: enqueing node: fabe with dist_so_far: 20 and h: 36            line: 171
+[ Debug: dequeued node: bfg with dist_so_far: 13                       line: 163
+[ Debug: enqueing node: bfgd with dist_so_far: 18 and h: 36            line: 171
+[ Debug: enqueing node: bfga with dist_so_far: 17 and h: 36            line: 171
+[ Debug: dequeued node: bgdf with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: bgdfa with dist_so_far: 31 and h: 27           line: 171
+[ Debug: enqueing node: bgdfo with dist_so_far: 30 and h: 27           line: 171
+[ Debug: dequeued node: aebg with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: aebgf with dist_so_far: 31 and h: 27           line: 171
+[ Debug: enqueing node: aebgd with dist_so_far: 30 and h: 27           line: 171
+[ Debug: enqueing node: aebgk with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: abeg with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: abegf with dist_so_far: 31 and h: 27           line: 171
+[ Debug: enqueing node: abegd with dist_so_far: 30 and h: 27           line: 171
+[ Debug: enqueing node: abegk with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: bdgf with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: bdgfa with dist_so_far: 31 and h: 27           line: 171
+[ Debug: enqueing node: bdgfo with dist_so_far: 30 and h: 27           line: 171
+[ Debug: dequeued node: aef with dist_so_far: 23                       line: 163
+[ Debug: enqueing node: aefg with dist_so_far: 29 and h: 29            line: 171
+[ Debug: enqueing node: aefk with dist_so_far: 34 and h: 29            line: 171
+[ Debug: enqueing node: aefb with dist_so_far: 27 and h: 29            line: 171
+[ Debug: dequeued node: afe with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: afeg with dist_so_far: 29 and h: 29            line: 171
+[ Debug: enqueing node: afek with dist_so_far: 34 and h: 29            line: 171
+[ Debug: enqueing node: afeb with dist_so_far: 23 and h: 29            line: 171
+[ Debug: dequeued node: bda with dist_so_far: 23                       line: 163
+[ Debug: enqueing node: bdaf with dist_so_far: 29 and h: 29            line: 171
+[ Debug: enqueing node: bdag with dist_so_far: 27 and h: 29            line: 171
+[ Debug: enqueing node: bdae with dist_so_far: 34 and h: 29            line: 171
+[ Debug: enqueing node: bdao with dist_so_far: 34 and h: 29            line: 171
+[ Debug: dequeued node: afeb with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: afebg with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: afebd with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: afebk with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: bad with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: badf with dist_so_far: 29 and h: 29            line: 171
+[ Debug: enqueing node: badg with dist_so_far: 23 and h: 29            line: 171
+[ Debug: enqueing node: bade with dist_so_far: 34 and h: 29            line: 171
+[ Debug: enqueing node: bado with dist_so_far: 34 and h: 29            line: 171
+[ Debug: dequeued node: badg with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: badgf with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: badge with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: badgo with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: bfga with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: bfgad with dist_so_far: 26 and h: 44           line: 171
+[ Debug: enqueing node: bfgae with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: agbf with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: agbfd with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: agbfe with dist_so_far: 26 and h: 44           line: 171
+[ Debug: dequeued node: agfb with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: agfbd with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: agfbe with dist_so_far: 22 and h: 44           line: 171
+[ Debug: dequeued node: fbga with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: fbgad with dist_so_far: 26 and h: 44           line: 171
+[ Debug: enqueing node: fbgae with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: gafb with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: gafbd with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: gafbe with dist_so_far: 22 and h: 44           line: 171
+[ Debug: dequeued node: fbag with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: fbagd with dist_so_far: 22 and h: 44           line: 171
+[ Debug: enqueing node: fbage with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: bfag with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: bfagd with dist_so_far: 22 and h: 44           line: 171
+[ Debug: enqueing node: bfage with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: gabf with dist_so_far: 17                      line: 163
+[ Debug: enqueing node: gabfd with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: gabfe with dist_so_far: 26 and h: 44           line: 171
+[ Debug: dequeued node: aebfg with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: aebfgd with dist_so_far: 34 and h: 30          line: 171
+[ Debug: enqueing node: aebfgk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: gae with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: gaef with dist_so_far: 27 and h: 31            line: 171
+[ Debug: enqueing node: gaek with dist_so_far: 34 and h: 31            line: 171
+[ Debug: enqueing node: gaeb with dist_so_far: 23 and h: 31            line: 171
+[ Debug: dequeued node: fbd with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: fbdg with dist_so_far: 23 and h: 31            line: 171
+[ Debug: enqueing node: fbda with dist_so_far: 27 and h: 31            line: 171
+[ Debug: enqueing node: fbdo with dist_so_far: 34 and h: 31            line: 171
+[ Debug: dequeued node: badgf with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: badgfe with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: badgfo with dist_so_far: 34 and h: 30          line: 171
+[ Debug: dequeued node: abd with dist_so_far: 20                       line: 163
+[ Debug: enqueing node: abdf with dist_so_far: 31 and h: 29            line: 171
+[ Debug: enqueing node: abdg with dist_so_far: 25 and h: 29            line: 171
+[ Debug: enqueing node: abde with dist_so_far: 36 and h: 29            line: 171
+[ Debug: enqueing node: abdo with dist_so_far: 36 and h: 29            line: 171
+[ Debug: dequeued node: abefg with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: abefgd with dist_so_far: 34 and h: 30          line: 171
+[ Debug: enqueing node: abefgk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: aeg with dist_so_far: 25                       line: 163
+[ Debug: enqueing node: aegf with dist_so_far: 31 and h: 31            line: 171
+[ Debug: enqueing node: aegk with dist_so_far: 34 and h: 31            line: 171
+[ Debug: enqueing node: aegb with dist_so_far: 31 and h: 31            line: 171
+[ Debug: dequeued node: afebg with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: afebgd with dist_so_far: 34 and h: 30          line: 171
+[ Debug: enqueing node: afebgk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: gbd with dist_so_far: 20                       line: 163
+[ Debug: enqueing node: gbdf with dist_so_far: 31 and h: 25            line: 171
+[ Debug: enqueing node: gbda with dist_so_far: 29 and h: 25            line: 171
+[ Debug: enqueing node: gbdo with dist_so_far: 36 and h: 25            line: 171
+[ Debug: dequeued node: bfgd with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: bfgda with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: bfgdo with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: afbe with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: afbeg with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: afbed with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: afbek with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: age with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: agef with dist_so_far: 27 and h: 31            line: 171
+[ Debug: enqueing node: agek with dist_so_far: 34 and h: 31            line: 171
+[ Debug: enqueing node: ageb with dist_so_far: 23 and h: 31            line: 171
+[ Debug: dequeued node: bagd with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: bagdf with dist_so_far: 29 and h: 25           line: 171
+[ Debug: enqueing node: bagde with dist_so_far: 34 and h: 25           line: 171
+[ Debug: enqueing node: bagdo with dist_so_far: 34 and h: 25           line: 171
+[ Debug: dequeued node: agbe with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: agbef with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: agbed with dist_so_far: 34 and h: 27           line: 171
+[ Debug: enqueing node: agbek with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: fbgd with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: fbgda with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: fbgdo with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: gabe with dist_so_far: 18                      line: 163
+[ Debug: enqueing node: gabef with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: gabed with dist_so_far: 34 and h: 27           line: 171
+[ Debug: enqueing node: gabek with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: bdgaf with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: bdgafe with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bdgafo with dist_so_far: 34 and h: 30          line: 171
+[ Debug: dequeued node: ageb with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: agebf with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: agebd with dist_so_far: 34 and h: 27           line: 171
+[ Debug: enqueing node: agebk with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: bagdf with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: bagdfe with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bagdfo with dist_so_far: 34 and h: 30          line: 171
+[ Debug: dequeued node: agbef with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: agbefd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: agbefk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: fbgda with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: fbgdae with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: fbgdao with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: gabef with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: gabefd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: gabefk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: agebf with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: agebfd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: agebfk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bfd with dist_so_far: 18                       line: 163
+[ Debug: enqueing node: bfdg with dist_so_far: 23 and h: 31            line: 171
+[ Debug: enqueing node: bfda with dist_so_far: 27 and h: 31            line: 171
+[ Debug: enqueing node: bfdo with dist_so_far: 34 and h: 31            line: 171
+[ Debug: dequeued node: fae with dist_so_far: 20                       line: 163
+[ Debug: enqueing node: faeg with dist_so_far: 31 and h: 29            line: 171
+[ Debug: enqueing node: faek with dist_so_far: 36 and h: 29            line: 171
+[ Debug: enqueing node: faeb with dist_so_far: 25 and h: 29            line: 171
+[ Debug: dequeued node: gbda with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: gbdaf with dist_so_far: 35 and h: 25           line: 171
+[ Debug: enqueing node: gbdae with dist_so_far: 40 and h: 25           line: 171
+[ Debug: enqueing node: gbdao with dist_so_far: 40 and h: 25           line: 171
+[ Debug: dequeued node: bfdg with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: bfdga with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: bfdgo with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: faeb with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: faebg with dist_so_far: 31 and h: 25           line: 171
+[ Debug: enqueing node: faebd with dist_so_far: 36 and h: 25           line: 171
+[ Debug: enqueing node: faebk with dist_so_far: 36 and h: 25           line: 171
+[ Debug: dequeued node: afbeg with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: afbegd with dist_so_far: 34 and h: 30          line: 171
+[ Debug: enqueing node: afbegk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bfdga with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: bfdgae with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bfdgao with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bfgda with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: bfgdae with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bfgdao with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bdf with dist_so_far: 25                       line: 163
+[ Debug: enqueing node: bdfg with dist_so_far: 31 and h: 31            line: 171
+[ Debug: enqueing node: bdfa with dist_so_far: 31 and h: 31            line: 171
+[ Debug: enqueing node: bdfo with dist_so_far: 30 and h: 31            line: 171
+[ Debug: dequeued node: abdg with dist_so_far: 25                      line: 163
+[ Debug: enqueing node: abdgf with dist_so_far: 31 and h: 25           line: 171
+[ Debug: enqueing node: abdge with dist_so_far: 36 and h: 25           line: 171
+[ Debug: enqueing node: abdgo with dist_so_far: 36 and h: 25           line: 171
+[ Debug: dequeued node: bae with dist_so_far: 20                       line: 163
+[ Debug: enqueing node: baef with dist_so_far: 29 and h: 25            line: 171
+[ Debug: enqueing node: baeg with dist_so_far: 31 and h: 25            line: 171
+[ Debug: enqueing node: baed with dist_so_far: 36 and h: 25            line: 171
+[ Debug: enqueing node: baek with dist_so_far: 36 and h: 25            line: 171
+[ Debug: dequeued node: bgdaf with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: bgdafe with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bgdafo with dist_so_far: 34 and h: 30          line: 171
+[ Debug: dequeued node: gaeb with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: gaebf with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: gaebd with dist_so_far: 34 and h: 27           line: 171
+[ Debug: enqueing node: gaebk with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: baef with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: baefg with dist_so_far: 35 and h: 25           line: 171
+[ Debug: enqueing node: baefd with dist_so_far: 40 and h: 25           line: 171
+[ Debug: enqueing node: baefk with dist_so_far: 40 and h: 25           line: 171
+[ Debug: dequeued node: fbdg with dist_so_far: 23                      line: 163
+[ Debug: enqueing node: fbdga with dist_so_far: 27 and h: 27           line: 171
+[ Debug: enqueing node: fbdgo with dist_so_far: 34 and h: 27           line: 171
+[ Debug: dequeued node: gaebf with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: gaebfd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: gaebfk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: fbdga with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: fbdgae with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: fbdgao with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bgdo with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: bgdof with dist_so_far: 35 and h: 20           line: 171
+[ Debug: enqueing node: bgdoa with dist_so_far: 41 and h: 20           line: 171
+[ Debug: dequeued node: aebd with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: aebdf with dist_so_far: 41 and h: 20           line: 171
+[ Debug: enqueing node: aebdg with dist_so_far: 35 and h: 20           line: 171
+[ Debug: enqueing node: aebdk with dist_so_far: 44 and h: 20           line: 171
+[ Debug: enqueing node: aebdo with dist_so_far: 46 and h: 20           line: 171
+[ Debug: dequeued node: aebk with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: aebkf with dist_so_far: 41 and h: 16           line: 171
+[ Debug: enqueing node: aebkg with dist_so_far: 39 and h: 16           line: 171
+[ Debug: enqueing node: aebkd with dist_so_far: 44 and h: 16           line: 171
+[ Debug: dequeued node: fgab with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: fgabd with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: fgabe with dist_so_far: 24 and h: 44           line: 171
+[ Debug: dequeued node: abek with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: abekf with dist_so_far: 41 and h: 16           line: 171
+[ Debug: enqueing node: abekg with dist_so_far: 39 and h: 16           line: 171
+[ Debug: enqueing node: abekd with dist_so_far: 44 and h: 16           line: 171
+[ Debug: dequeued node: gfba with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: gfbad with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: gfbae with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: abed with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: abedf with dist_so_far: 41 and h: 20           line: 171
+[ Debug: enqueing node: abedg with dist_so_far: 35 and h: 20           line: 171
+[ Debug: enqueing node: abedk with dist_so_far: 44 and h: 20           line: 171
+[ Debug: enqueing node: abedo with dist_so_far: 46 and h: 20           line: 171
+[ Debug: dequeued node: afbg with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: afbgd with dist_so_far: 24 and h: 44           line: 171
+[ Debug: enqueing node: afbge with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: aebkg with dist_so_far: 39                     line: 163
+[ Debug: enqueing node: aebkgf with dist_so_far: 45 and h: 16          line: 171
+[ Debug: enqueing node: aebkgd with dist_so_far: 44 and h: 16          line: 171
+[ Debug: dequeued node: abekg with dist_so_far: 39                     line: 163
+[ Debug: enqueing node: abekgf with dist_so_far: 45 and h: 16          line: 171
+[ Debug: enqueing node: abekgd with dist_so_far: 44 and h: 16          line: 171
+[ Debug: dequeued node: abedg with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: abedgf with dist_so_far: 41 and h: 16          line: 171
+[ Debug: enqueing node: abedgk with dist_so_far: 44 and h: 16          line: 171
+[ Debug: enqueing node: abedgo with dist_so_far: 46 and h: 16          line: 171
+[ Debug: dequeued node: abfg with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: abfgd with dist_so_far: 24 and h: 44           line: 171
+[ Debug: enqueing node: abfge with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: fagb with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: fagbd with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: fagbe with dist_so_far: 24 and h: 44           line: 171
+[ Debug: dequeued node: bgdof with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: bgdofa with dist_so_far: 41 and h: 16          line: 171
+[ Debug: dequeued node: aebdg with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: aebdgf with dist_so_far: 41 and h: 16          line: 171
+[ Debug: enqueing node: aebdgk with dist_so_far: 44 and h: 16          line: 171
+[ Debug: enqueing node: aebdgo with dist_so_far: 46 and h: 16          line: 171
+[ Debug: dequeued node: bagf with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: bagfd with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: bagfe with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: gbfa with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: gbfad with dist_so_far: 28 and h: 44           line: 171
+[ Debug: enqueing node: gbfae with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: bgaf with dist_so_far: 19                      line: 163
+[ Debug: enqueing node: bgafd with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: bgafe with dist_so_far: 28 and h: 44           line: 171
+[ Debug: dequeued node: bdgo with dist_so_far: 30                      line: 163
+[ Debug: enqueing node: bdgof with dist_so_far: 35 and h: 20           line: 171
+[ Debug: enqueing node: bdgoa with dist_so_far: 41 and h: 20           line: 171
+[ Debug: dequeued node: bdgof with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: bdgofa with dist_so_far: 41 and h: 16          line: 171
+[ Debug: dequeued node: bdag with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: bdagf with dist_so_far: 33 and h: 25           line: 171
+[ Debug: enqueing node: bdage with dist_so_far: 38 and h: 25           line: 171
+[ Debug: enqueing node: bdago with dist_so_far: 38 and h: 25           line: 171
+[ Debug: dequeued node: aefb with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: aefbg with dist_so_far: 33 and h: 25           line: 171
+[ Debug: enqueing node: aefbd with dist_so_far: 38 and h: 25           line: 171
+[ Debug: enqueing node: aefbk with dist_so_far: 38 and h: 25           line: 171
+[ Debug: dequeued node: fabe with dist_so_far: 20                      line: 163
+[ Debug: enqueing node: fabeg with dist_so_far: 31 and h: 25           line: 171
+[ Debug: enqueing node: fabed with dist_so_far: 36 and h: 25           line: 171
+[ Debug: enqueing node: fabek with dist_so_far: 36 and h: 25           line: 171
+[ Debug: dequeued node: baeg with dist_so_far: 31                      line: 163
+[ Debug: enqueing node: baegf with dist_so_far: 37 and h: 27           line: 171
+[ Debug: enqueing node: baegd with dist_so_far: 36 and h: 27           line: 171
+[ Debug: enqueing node: baegk with dist_so_far: 40 and h: 27           line: 171
+[ Debug: dequeued node: fabeg with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: fabegd with dist_so_far: 36 and h: 30          line: 171
+[ Debug: enqueing node: fabegk with dist_so_far: 40 and h: 30          line: 171
+[ Debug: dequeued node: faebg with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: faebgd with dist_so_far: 36 and h: 30          line: 171
+[ Debug: enqueing node: faebgk with dist_so_far: 40 and h: 30          line: 171
+[ Debug: dequeued node: abdgf with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: abdgfe with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: abdgfo with dist_so_far: 36 and h: 30          line: 171
+[ Debug: dequeued node: abgd with dist_so_far: 20                      line: 163
+[ Debug: enqueing node: abgdf with dist_so_far: 31 and h: 25           line: 171
+[ Debug: enqueing node: abgde with dist_so_far: 36 and h: 25           line: 171
+[ Debug: enqueing node: abgdo with dist_so_far: 36 and h: 25           line: 171
+[ Debug: dequeued node: gbdf with dist_so_far: 31                      line: 163
+[ Debug: enqueing node: gbdfa with dist_so_far: 37 and h: 27           line: 171
+[ Debug: enqueing node: gbdfo with dist_so_far: 36 and h: 27           line: 171
+[ Debug: dequeued node: abgdf with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: abgdfe with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: abgdfo with dist_so_far: 36 and h: 30          line: 171
+[ Debug: dequeued node: bdgfo with dist_so_far: 30                     line: 163
+[ Debug: enqueing node: bdgfoa with dist_so_far: 41 and h: 16          line: 171
+[ Debug: dequeued node: bgdofa with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: bgdofae with dist_so_far: 52 and h: 16         line: 171
+[ Debug: dequeued node: bdgofa with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: bdgofae with dist_so_far: 52 and h: 16         line: 171
+[ Debug: dequeued node: bdgfoa with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: bdgfoae with dist_so_far: 52 and h: 16         line: 171
+[ Debug: dequeued node: aebdgf with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: aebdgfk with dist_so_far: 52 and h: 16         line: 171
+[ Debug: enqueing node: aebdgfo with dist_so_far: 46 and h: 16         line: 171
+[ Debug: dequeued node: aebgd with dist_so_far: 30                     line: 163
+[ Debug: enqueing node: aebgdf with dist_so_far: 41 and h: 16          line: 171
+[ Debug: enqueing node: aebgdk with dist_so_far: 44 and h: 16          line: 171
+[ Debug: enqueing node: aebgdo with dist_so_far: 46 and h: 16          line: 171
+[ Debug: dequeued node: abegd with dist_so_far: 30                     line: 163
+[ Debug: enqueing node: abegdf with dist_so_far: 41 and h: 16          line: 171
+[ Debug: enqueing node: abegdk with dist_so_far: 44 and h: 16          line: 171
+[ Debug: enqueing node: abegdo with dist_so_far: 46 and h: 16          line: 171
+[ Debug: dequeued node: abedgf with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: abedgfk with dist_so_far: 52 and h: 16         line: 171
+[ Debug: enqueing node: abedgfo with dist_so_far: 46 and h: 16         line: 171
+[ Debug: dequeued node: aebgdf with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: aebgdfk with dist_so_far: 52 and h: 16         line: 171
+[ Debug: enqueing node: aebgdfo with dist_so_far: 46 and h: 16         line: 171
+[ Debug: dequeued node: abegdf with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: abegdfk with dist_so_far: 52 and h: 16         line: 171
+[ Debug: enqueing node: abegdfo with dist_so_far: 46 and h: 16         line: 171
+[ Debug: dequeued node: bgdfo with dist_so_far: 30                     line: 163
+[ Debug: enqueing node: bgdfoa with dist_so_far: 41 and h: 16          line: 171
+[ Debug: dequeued node: aebkf with dist_so_far: 41                     line: 163
+[ Debug: enqueing node: aebkfg with dist_so_far: 47 and h: 16          line: 171
+[ Debug: enqueing node: aebkfd with dist_so_far: 52 and h: 16          line: 171
+[ Debug: dequeued node: abekf with dist_so_far: 41                     line: 163
+[ Debug: enqueing node: abekfg with dist_so_far: 47 and h: 16          line: 171
+[ Debug: enqueing node: abekfd with dist_so_far: 52 and h: 16          line: 171
+[ Debug: dequeued node: bgdfoa with dist_so_far: 41                    line: 163
+[ Debug: enqueing node: bgdfoae with dist_so_far: 52 and h: 16         line: 171
+[ Debug: dequeued node: fgba with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: fgbad with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: fgbae with dist_so_far: 32 and h: 44           line: 171
+[ Debug: dequeued node: fabg with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: fabgd with dist_so_far: 26 and h: 44           line: 171
+[ Debug: enqueing node: fabge with dist_so_far: 32 and h: 44           line: 171
+[ Debug: dequeued node: bgfa with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: bgfad with dist_so_far: 30 and h: 44           line: 171
+[ Debug: enqueing node: bgfae with dist_so_far: 32 and h: 44           line: 171
+[ Debug: dequeued node: gfab with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: gfabd with dist_so_far: 32 and h: 44           line: 171
+[ Debug: enqueing node: gfabe with dist_so_far: 26 and h: 44           line: 171
+[ Debug: dequeued node: gbaf with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: gbafd with dist_so_far: 32 and h: 44           line: 171
+[ Debug: enqueing node: gbafe with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: abgf with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: abgfd with dist_so_far: 32 and h: 44           line: 171
+[ Debug: enqueing node: abgfe with dist_so_far: 30 and h: 44           line: 171
+[ Debug: dequeued node: bafg with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: bafgd with dist_so_far: 26 and h: 44           line: 171
+[ Debug: enqueing node: bafge with dist_so_far: 32 and h: 44           line: 171
+[ Debug: dequeued node: afgb with dist_so_far: 21                      line: 163
+[ Debug: enqueing node: afgbd with dist_so_far: 32 and h: 44           line: 171
+[ Debug: enqueing node: afgbe with dist_so_far: 26 and h: 44           line: 171
+[ Debug: dequeued node: gaef with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: gaefk with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: gaefb with dist_so_far: 31 and h: 31           line: 171
+[ Debug: dequeued node: badf with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: badfg with dist_so_far: 35 and h: 31           line: 171
+[ Debug: enqueing node: badfe with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: badfo with dist_so_far: 34 and h: 31           line: 171
+[ Debug: dequeued node: bdaf with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: bdafg with dist_so_far: 35 and h: 31           line: 171
+[ Debug: enqueing node: bdafe with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: bdafo with dist_so_far: 34 and h: 31           line: 171
+[ Debug: dequeued node: aefbg with dist_so_far: 33                     line: 163
+[ Debug: enqueing node: aefbgd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: aefbgk with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: bdagf with dist_so_far: 33                     line: 163
+[ Debug: enqueing node: bdagfe with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: bdagfo with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: afeg with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: afegk with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: afegb with dist_so_far: 35 and h: 31           line: 171
+[ Debug: dequeued node: aefg with dist_so_far: 29                      line: 163
+[ Debug: enqueing node: aefgk with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: aefgb with dist_so_far: 35 and h: 31           line: 171
+[ Debug: dequeued node: bdgfa with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: bdgfae with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: bdgfao with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: bgad with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: bgadf with dist_so_far: 33 and h: 25           line: 171
+[ Debug: enqueing node: bgade with dist_so_far: 38 and h: 25           line: 171
+[ Debug: enqueing node: bgado with dist_so_far: 38 and h: 25           line: 171
+[ Debug: dequeued node: abegf with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: abegfd with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: abegfk with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: aebgf with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: aebgfd with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: aebgfk with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: bgdfa with dist_so_far: 31                     line: 163
+[ Debug: enqueing node: bgdfae with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: bgdfao with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: gafe with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: gafek with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: gafeb with dist_so_far: 27 and h: 31           line: 171
+[ Debug: dequeued node: fbad with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: fbadg with dist_so_far: 27 and h: 31           line: 171
+[ Debug: enqueing node: fbade with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: fbado with dist_so_far: 38 and h: 31           line: 171
+[ Debug: dequeued node: bfad with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: bfadg with dist_so_far: 27 and h: 31           line: 171
+[ Debug: enqueing node: bfade with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: bfado with dist_so_far: 38 and h: 31           line: 171
+[ Debug: dequeued node: bfda with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: bfdag with dist_so_far: 31 and h: 31           line: 171
+[ Debug: enqueing node: bfdae with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: bfdao with dist_so_far: 38 and h: 31           line: 171
+[ Debug: dequeued node: agef with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: agefk with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: agefb with dist_so_far: 31 and h: 31           line: 171
+[ Debug: dequeued node: agfe with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: agfek with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: agfeb with dist_so_far: 27 and h: 31           line: 171
+[ Debug: dequeued node: abfe with dist_so_far: 22                      line: 163
+[ Debug: enqueing node: abfeg with dist_so_far: 33 and h: 25           line: 171
+[ Debug: enqueing node: abfed with dist_so_far: 38 and h: 25           line: 171
+[ Debug: enqueing node: abfek with dist_so_far: 38 and h: 25           line: 171
+[ Debug: dequeued node: fbda with dist_so_far: 27                      line: 163
+[ Debug: enqueing node: fbdag with dist_so_far: 31 and h: 31           line: 171
+[ Debug: enqueing node: fbdae with dist_so_far: 38 and h: 31           line: 171
+[ Debug: enqueing node: fbdao with dist_so_far: 38 and h: 31           line: 171
+[ Debug: dequeued node: bfadg with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: bfadge with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: bfadgo with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bgadf with dist_so_far: 33                     line: 163
+[ Debug: enqueing node: bgadfe with dist_so_far: 42 and h: 30          line: 171
+[ Debug: enqueing node: bgadfo with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: gafeb with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: gafebd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: gafebk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: agfeb with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: agfebd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: agfebk with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: abfeg with dist_so_far: 33                     line: 163
+[ Debug: enqueing node: abfegd with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: abfegk with dist_so_far: 42 and h: 30          line: 171
+[ Debug: dequeued node: fbadg with dist_so_far: 27                     line: 163
+[ Debug: enqueing node: fbadge with dist_so_far: 38 and h: 30          line: 171
+[ Debug: enqueing node: fbadgo with dist_so_far: 38 and h: 30          line: 171
+[ Debug: dequeued node: bgdao with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bgdaof with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: bgdaoe with dist_so_far: 48 and h: 20          line: 171
+[ Debug: dequeued node: bdgao with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bdgaof with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: bdgaoe with dist_so_far: 48 and h: 20          line: 171
+[ Debug: dequeued node: afebk with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: afebkg with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: afebkd with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: badgo with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: badgof with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: badgoe with dist_so_far: 48 and h: 20          line: 171
+[ Debug: dequeued node: badge with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: badgef with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: badgek with dist_so_far: 50 and h: 16          line: 171
+[ Debug: enqueing node: badgeo with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: aebfd with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: aebfdg with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: aebfdk with dist_so_far: 48 and h: 20          line: 171
+[ Debug: enqueing node: aebfdo with dist_so_far: 50 and h: 20          line: 171
+[ Debug: dequeued node: abefd with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: abefdg with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: abefdk with dist_so_far: 48 and h: 20          line: 171
+[ Debug: enqueing node: abefdo with dist_so_far: 50 and h: 20          line: 171
+[ Debug: dequeued node: afebd with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: afebdg with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: afebdk with dist_so_far: 48 and h: 20          line: 171
+[ Debug: enqueing node: afebdo with dist_so_far: 50 and h: 20          line: 171
+[ Debug: dequeued node: aek with dist_so_far: 30                       line: 163
+[ Debug: enqueing node: aekf with dist_so_far: 41 and h: 20            line: 171
+[ Debug: enqueing node: aekg with dist_so_far: 39 and h: 20            line: 171
+[ Debug: enqueing node: aekb with dist_so_far: 41 and h: 20            line: 171
+[ Debug: dequeued node: abefk with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: abefkg with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: abefkd with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: aebfk with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: aebfkg with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: aebfkd with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: bdo with dist_so_far: 30                       line: 163
+[ Debug: enqueing node: bdof with dist_so_far: 35 and h: 24            line: 171
+[ Debug: enqueing node: bdog with dist_so_far: 41 and h: 24            line: 171
+[ Debug: enqueing node: bdoa with dist_so_far: 41 and h: 24            line: 171
+[ Debug: dequeued node: bagdo with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bagdof with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: bagdoe with dist_so_far: 48 and h: 20          line: 171
+[ Debug: dequeued node: bagde with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bagdef with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: bagdek with dist_so_far: 50 and h: 16          line: 171
+[ Debug: enqueing node: bagdeo with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: bdgae with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bdgaef with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: bdgaek with dist_so_far: 50 and h: 16          line: 171
+[ Debug: enqueing node: bdgaeo with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: aekg with dist_so_far: 39                      line: 163
+[ Debug: enqueing node: aekgf with dist_so_far: 45 and h: 20           line: 171
+[ Debug: enqueing node: aekgb with dist_so_far: 45 and h: 20           line: 171
+[ Debug: dequeued node: aebfkg with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: aebfkgd with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bdof with dist_so_far: 35                      line: 163
+[ Debug: enqueing node: bdofg with dist_so_far: 41 and h: 20           line: 171
+[ Debug: enqueing node: bdofa with dist_so_far: 41 and h: 20           line: 171
+[ Debug: dequeued node: bagdof with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: bagdofe with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bagdef with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: bagdefk with dist_so_far: 54 and h: 16         line: 171
+[ Debug: enqueing node: bagdefo with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bdgaef with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: bdgaefk with dist_so_far: 54 and h: 16         line: 171
+[ Debug: enqueing node: bdgaefo with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: abefkg with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: abefkgd with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: afbek with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: afbekg with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: afbekd with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: afebdg with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: afebdgk with dist_so_far: 48 and h: 16         line: 171
+[ Debug: enqueing node: afebdgo with dist_so_far: 50 and h: 16         line: 171
+[ Debug: dequeued node: abefdg with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: abefdgk with dist_so_far: 48 and h: 16         line: 171
+[ Debug: enqueing node: abefdgo with dist_so_far: 50 and h: 16         line: 171
+[ Debug: dequeued node: afbed with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: afbedg with dist_so_far: 39 and h: 20          line: 171
+[ Debug: enqueing node: afbedk with dist_so_far: 48 and h: 20          line: 171
+[ Debug: enqueing node: afbedo with dist_so_far: 50 and h: 20          line: 171
+[ Debug: dequeued node: afbekg with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: afbekgd with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bgdaof with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: bgdaofe with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bdgaof with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: bdgaofe with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: afbedg with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: afbedgk with dist_so_far: 48 and h: 16         line: 171
+[ Debug: enqueing node: afbedgo with dist_so_far: 50 and h: 16         line: 171
+[ Debug: dequeued node: badgof with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: badgofe with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: aebfdg with dist_so_far: 39                    line: 163
+[ Debug: enqueing node: aebfdgk with dist_so_far: 48 and h: 16         line: 171
+[ Debug: enqueing node: aebfdgo with dist_so_far: 50 and h: 16         line: 171
+[ Debug: dequeued node: badgef with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: badgefk with dist_so_far: 54 and h: 16         line: 171
+[ Debug: enqueing node: badgefo with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: afebkg with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: afebkgd with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: bgdae with dist_so_far: 34                     line: 163
+[ Debug: enqueing node: bgdaef with dist_so_far: 43 and h: 16          line: 171
+[ Debug: enqueing node: bgdaek with dist_so_far: 50 and h: 16          line: 171
+[ Debug: enqueing node: bgdaeo with dist_so_far: 48 and h: 16          line: 171
+[ Debug: dequeued node: bgdaef with dist_so_far: 43                    line: 163
+[ Debug: enqueing node: bgdaefk with dist_so_far: 54 and h: 16         line: 171
+[ Debug: enqueing node: bgdaefo with dist_so_far: 48 and h: 16         line: 171
+[ Debug: dequeued node: abegdk with dist_so_far: 44                    line: 163
+[ Debug: enqueing node: abegdkf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: abegdko with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: aebgdk with dist_so_far: 44                    line: 163
+[ Debug: enqueing node: aebgdkf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: aebgdko with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: afbd with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: afbdg with dist_so_far: 29 and h: 31           line: 171
+[ Debug: enqueing node: afbde with dist_so_far: 40 and h: 31           line: 171
+[ Debug: enqueing node: afbdo with dist_so_far: 40 and h: 31           line: 171
+[ Debug: dequeued node: bgae with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: bgaef with dist_so_far: 33 and h: 27           line: 171
+[ Debug: enqueing node: bgaed with dist_so_far: 40 and h: 27           line: 171
+[ Debug: enqueing node: bgaek with dist_so_far: 40 and h: 27           line: 171
+[ Debug: dequeued node: aebkgd with dist_so_far: 44                    line: 163
+[ Debug: enqueing node: aebkgdf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: aebkgdo with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: aebdgk with dist_so_far: 44                    line: 163
+[ Debug: enqueing node: aebdgkf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: aebdgko with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: abedgk with dist_so_far: 44                    line: 163
+[ Debug: enqueing node: abedgkf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: abedgko with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: bafe with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: bafeg with dist_so_far: 35 and h: 25           line: 171
+[ Debug: enqueing node: bafed with dist_so_far: 40 and h: 25           line: 171
+[ Debug: enqueing node: bafek with dist_so_far: 40 and h: 25           line: 171
+[ Debug: dequeued node: abekd with dist_so_far: 44                     line: 163
+[ Debug: enqueing node: abekdf with dist_so_far: 55 and h: 11          line: 171
+[ Debug: enqueing node: abekdg with dist_so_far: 49 and h: 11          line: 171
+[ Debug: enqueing node: abekdo with dist_so_far: 60 and h: 11          line: 171
+[ Debug: dequeued node: aebkd with dist_so_far: 44                     line: 163
+[ Debug: enqueing node: aebkdf with dist_so_far: 55 and h: 11          line: 171
+[ Debug: enqueing node: aebkdg with dist_so_far: 49 and h: 11          line: 171
+[ Debug: enqueing node: aebkdo with dist_so_far: 60 and h: 11          line: 171
+[ Debug: dequeued node: bage with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: bagef with dist_so_far: 33 and h: 27           line: 171
+[ Debug: enqueing node: baged with dist_so_far: 40 and h: 27           line: 171
+[ Debug: enqueing node: bagek with dist_so_far: 40 and h: 27           line: 171
+[ Debug: dequeued node: bfae with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: bfaeg with dist_so_far: 35 and h: 25           line: 171
+[ Debug: enqueing node: bfaed with dist_so_far: 40 and h: 25           line: 171
+[ Debug: enqueing node: bfaek with dist_so_far: 40 and h: 25           line: 171
+[ Debug: dequeued node: baefg with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: baefgd with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: baefgk with dist_so_far: 44 and h: 30          line: 171
+[ Debug: dequeued node: abfd with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: abfdg with dist_so_far: 29 and h: 31           line: 171
+[ Debug: enqueing node: abfde with dist_so_far: 40 and h: 31           line: 171
+[ Debug: enqueing node: abfdo with dist_so_far: 40 and h: 31           line: 171
+[ Debug: dequeued node: agbd with dist_so_far: 24                      line: 163
+[ Debug: enqueing node: agbdf with dist_so_far: 35 and h: 25           line: 171
+[ Debug: enqueing node: agbde with dist_so_far: 40 and h: 25           line: 171
+[ Debug: enqueing node: agbdo with dist_so_far: 40 and h: 25           line: 171
+[ Debug: dequeued node: gbdaf with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: gbdafe with dist_so_far: 44 and h: 30          line: 171
+[ Debug: enqueing node: gbdafo with dist_so_far: 40 and h: 30          line: 171
+[ Debug: dequeued node: bfaeg with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: bfaegd with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: bfaegk with dist_so_far: 44 and h: 30          line: 171
+[ Debug: dequeued node: bafeg with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: bafegd with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: bafegk with dist_so_far: 44 and h: 30          line: 171
+[ Debug: dequeued node: abfdg with dist_so_far: 29                     line: 163
+[ Debug: enqueing node: abfdge with dist_so_far: 40 and h: 30          line: 171
+[ Debug: enqueing node: abfdgo with dist_so_far: 40 and h: 30          line: 171
+[ Debug: dequeued node: agbdf with dist_so_far: 35                     line: 163
+[ Debug: enqueing node: agbdfe with dist_so_far: 44 and h: 30          line: 171
+[ Debug: enqueing node: agbdfo with dist_so_far: 40 and h: 30          line: 171
+[ Debug: dequeued node: aebkdg with dist_so_far: 49                    line: 163
+[ Debug: enqueing node: aebkdgf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: aebkdgo with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: bagef with dist_so_far: 33                     line: 163
+[ Debug: enqueing node: bagefd with dist_so_far: 44 and h: 30          line: 171
+[ Debug: enqueing node: bagefk with dist_so_far: 44 and h: 30          line: 171
+[ Debug: dequeued node: abekdg with dist_so_far: 49                    line: 163
+[ Debug: enqueing node: abekdgf with dist_so_far: 55 and h: 5          line: 171
+[ Debug: enqueing node: abekdgo with dist_so_far: 60 and h: 5          line: 171
+[ Debug: dequeued node: faeg with dist_so_far: 31                      line: 163
+[ Debug: enqueing node: faegk with dist_so_far: 40 and h: 31           line: 171
+[ Debug: enqueing node: faegb with dist_so_far: 37 and h: 31           line: 171
+[ Debug: dequeued node: aebkgdf with dist_so_far: 55                   line: 163
+[ Debug: enqueing node: aebkgdfo with dist_so_far: 60 and h: 0         line: 171
+[ Debug: dequeued node: aebkdgf with dist_so_far: 55                   line: 163
+[ Debug: enqueing node: aebkdgfo with dist_so_far: 60 and h: 0         line: 171
+[ Debug: dequeued node: aebdgkf with dist_so_far: 55                   line: 163
+[ Debug: enqueing node: aebdgkfo with dist_so_far: 60 and h: 0         line: 171
+[ Debug: dequeued node: abekdgf with dist_so_far: 55                   line: 163
+[ Debug: enqueing node: abekdgfo with dist_so_far: 60 and h: 0         line: 171
+[ Debug: dequeued node: aebkgdfo with dist_so_far: 60                  line: 163
