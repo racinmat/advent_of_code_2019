@@ -151,6 +151,7 @@ function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     heur_cache = HeurCache()
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
+    open_configs = Set{Tuple{Int, Set{Char}, Int}}()  # set of tuples (position, set of taken keys, dist)
     start_node = Node([], copy(g), start_pos, 0, typemax(Int) ÷ 10)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
@@ -169,9 +170,17 @@ function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
         @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
             door2neighbors, door2node, full_dists, heur_cache)
         for (dist, neighbor) in node_neighbors
+            neighbor = node_neighbors[1][2]
             f = neighbor.dist_so_far + neighbor.heur
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
-            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
+            neighbor_repr = (neighbor.cur_pos, Set(copy(neighbor.taken_keys)), neighbor.dist_so_far)
+            # todo: not working, figure out why
+            if neighbor_repr ∈ open_configs
+                @debug "skipping it, already enqued"
+            else
+                push!(open_configs, neighbor_repr)
+                @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
+            end
         end
     end
 end
