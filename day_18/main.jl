@@ -5,10 +5,10 @@ using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructu
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
-#     x->hcat(x...) |> x->permutedims(x, [2, 1])
-data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
     x->hcat(x...) |> x->permutedims(x, [2, 1])
+# data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
 function build_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
@@ -63,6 +63,8 @@ struct Node
     graph::SimpleGraph
     cur_pos::Int
     dist_so_far::Int
+    parent::Union{Node, Nothing}
+    heur::Int
 end
 
 function shortest_paths(node::Node, dist_cache::DistCache)
@@ -81,8 +83,9 @@ function get_avail_keys(dists::Array{Int, 2}, node::Node, key2node)
     let2dist
 end
 
-function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node, graph_cache)
-    next_node = key2node[next_key]
+function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, door2neighbors, door2node, graph_cache,
+        full_dists, heur_cache)
+    next_pos = key2node[next_key]
     @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
     # copying graph is costly, both time and memory-wise
     push!(next_taken_keys, next_key)
@@ -98,15 +101,16 @@ function build_neighbor(node::Node, next_key::Char, dist_traveled, key2node, doo
         graph_cache[cache_key] = next_graph
     end
     next_graph = graph_cache[cache_key]
-    Node(next_taken_keys, next_graph, next_node, node.dist_so_far + dist_traveled)
+    @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_pos, key2node, full_dists, heur_cache)
+    Node(next_taken_keys, next_graph, next_pos, node.dist_so_far + dist_traveled, node, min(h_val, node.heur))
 end
 
 # based on sum of distances to nearest neighbour of each node
-# function heuristic(node::Node, key2node, full_dists, heur_cache)
+# function heuristic!(taken_keys, cur_pos, key2node, full_dists, heur_cache)
 # # todo: try out if sorting kaes sense, seems like takes lots of time?
-#     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+#     @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
 #     isempty(nodes_to_go) && return 0
-#     @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
+#     @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
 #     if !haskey(heur_cache, nodes_to_go)
 #         @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
 #         @timeit to "find min_rows sum" min_rows_sum = minimum(keys_dists, dims=1) |> sum
@@ -116,11 +120,11 @@ end
 # end
 
 # based on minimal spanning tree
-function heuristic(node::Node, key2node, full_dists, heur_cache)
+function heuristic!(taken_keys, cur_pos, key2node, full_dists, heur_cache)
 # todo: try out if sorting kaes sense, seems like takes lots of time?
-    @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ node.taken_keys]
+    @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
     isempty(nodes_to_go) && return 0
-    @timeit to "push! nodes_to_go" push!(nodes_to_go, node.cur_pos)
+    @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
     if !haskey(heur_cache, nodes_to_go)
         @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
         @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
@@ -129,14 +133,16 @@ function heuristic(node::Node, key2node, full_dists, heur_cache)
     heur_cache[nodes_to_go]
 end
 
-# function heuristic(node::Node, key2node, full_dists)
-#     length(key2node) - length(node.taken_keys)
-# end
+function heuristic!(taken_keys, cur_pos, key2node, full_dists)
+    length(key2node) - length(taken_keys)
+end
 
-function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neighbors, door2node)
+function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists, heur_cache)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    @timeit to "build_neighbor arr" neighbors = [(dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache)) for (letter, dist) in avail_keys]
+    @timeit to "build_neighbor arr" neighbors = [
+        (dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache, full_dists, heur_cache))
+        for (letter, dist) in avail_keys]
     neighbors
 end
 
@@ -147,7 +153,7 @@ function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     heur_cache = HeurCache()
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
-    start_node = Node([], copy(g), start_pos, 0)
+    start_node = Node([], copy(g), start_pos, 0, nothing, typemax(Int) ÷ 10)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
@@ -162,11 +168,11 @@ function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
         if length(cur_node.taken_keys) == length(key2node)
             return cur_node.dist_so_far
         end
-        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node, door2neighbors, door2node)
+        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
+            door2neighbors, door2node, full_dists, heur_cache)
         for (dist, neighbor) in node_neighbors
-            @timeit to "calc_heuristic" h_val = heuristic(neighbor, key2node, full_dists, heur_cache)
-            f = neighbor.dist_so_far + h_val
-            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $h_val"
+            f = neighbor.dist_so_far + neighbor.heur
+            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
             @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
         end
     end
@@ -281,6 +287,7 @@ g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_gr
 data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 136
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
 #
