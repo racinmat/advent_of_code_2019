@@ -1,6 +1,6 @@
 using DrWatson
 quickactivate(@__DIR__)
-using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures, SimpleWeightedGraphs
+using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructures, SimpleWeightedGraphs, Dates
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
@@ -51,7 +51,8 @@ function build_graph(data)
     g.graph, key2node, door2node, door2neighbors, start_node, g.vprops, full_graph
 end
 
-DistCache = Dict{Set{Char}, Array{Int, 2}}
+# DistCache = Dict{Set{Char}, Array{Int, 2}}
+DistCache = Dict{Tuple{Set{Char}, Int}, Vector{Int}}
 HeurCache = Dict{Vector{Int}, Int}
 GraphCache = Dict{Set{Char}, AbstractGraph}
 SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
@@ -66,18 +67,17 @@ struct Node
 end
 
 function shortest_paths(node::Node, dist_cache::DistCache)
-    @timeit to "shortest_paths set" have_keys = Set(node.taken_keys)
-    if !haskey(dist_cache, have_keys)
-        @timeit to "floyd_warshall" states = floyd_warshall_shortest_paths(node.graph)
-        @timeit to "copy(states.dists)" dist_cache[have_keys] = copy(states.dists)
+    @timeit to "shortest_paths cache key" dist_cache_key = (Set(node.taken_keys), node.cur_pos)
+    if !haskey(dist_cache, dist_cache_key)
+        @timeit to "dijkstra" states = dijkstra_shortest_paths(node.graph, node.cur_pos)
+        @timeit to "copy(states.dists)" dist_cache[dist_cache_key] = copy(states.dists)
     end
-    dist_cache[have_keys]
+    dist_cache[dist_cache_key]
 end
 
-function get_avail_keys(dists::Array{Int, 2}, node::Node, key2node)
+function get_avail_keys(dists::Vector{Int}, node::Node, key2node)
     cur_pos = node.cur_pos
-    dist_from_node = dists[cur_pos, :]
-    let2dist = Dict(letter=>dist_from_node[node] for (letter, node) in key2node if dist_from_node[node] < typemax(Int))
+    let2dist = Dict(letter=>dists[node] for (letter, node) in key2node if dists[node] < typemax(Int))
     let2dist
 end
 
@@ -131,16 +131,25 @@ function heuristic!(taken_keys, cur_pos, key2node, full_dists, heur_cache)
     heur_cache[nodes_to_go]
 end
 
-function heuristic!(taken_keys, cur_pos, key2node, full_dists)
-    length(key2node) - length(taken_keys)
+function make_neighbor_repr(node::Node, letter, dist, key2node)
+    next_pos = key2node[letter]
+    next_taken_keys = copy(node.taken_keys)
+    push!(next_taken_keys, letter)
+    next_pos, Set(next_taken_keys), node.dist_so_far + dist
 end
 
-function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists, heur_cache)
+function get_neighbors(node::Node, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists, heur_cache, open_configs)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
+    @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, key2node) for (letter, dist) in avail_keys)
     @timeit to "build_neighbor arr" neighbors = [
         (dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache, full_dists, heur_cache))
-        for (letter, dist) in avail_keys]
+        for (letter, dist) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
+    for (letter, neighbor_repr) in neighbor_reprs
+        if neighbor_repr ∉ open_configs
+            push!(open_configs, neighbor_repr)
+        end
+    end
     neighbors
 end
 
@@ -156,30 +165,29 @@ function astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
+    max_size = 0
     for i in 1:size(full_dists)[1]
         full_dists[i, i] = max_val * 100
     end
-
+    target_len = length(key2node)
     enqueue!(open_nodes, start_node, 1)
     while !isempty(open_nodes)
         @timeit to "dequeue" cur_node = dequeue!(open_nodes)
+        cur_node_len = length(cur_node.taken_keys)
         @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
-        if length(cur_node.taken_keys) == length(key2node)
+        if cur_node_len == target_len
             return cur_node.dist_so_far
         end
+        if cur_node_len > max_size
+            verbose && println("$(Dates.now()): max solution len: $cur_node_len")
+            max_size = cur_node_len
+        end
         @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
-            door2neighbors, door2node, full_dists, heur_cache)
+            door2neighbors, door2node, full_dists, heur_cache, open_configs)
         for (dist, neighbor) in node_neighbors
             f = neighbor.dist_so_far + neighbor.heur
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
-            @timeit to "neighbor_repr" neighbor_repr = (neighbor.cur_pos, Set(copy(neighbor.taken_keys)), neighbor.dist_so_far)
-            # todo: not working, figure out why
-            if neighbor_repr ∈ open_configs
-                @debug "skipping it, already enqued"
-            else
-                push!(open_configs, neighbor_repr)
-                @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
-            end
+            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
         end
     end
 end
@@ -200,6 +208,8 @@ base_stream = global_logger().stream
 my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simple_fmt, show_limited=true, right_justify=100)
 using BenchmarkTools
 to = TimerOutput()
+verbose = false
+verbose = true
 
 with_logger(my_debug_logger) do
     astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
@@ -213,55 +223,61 @@ display(to)
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 44
-# 1.453 ms (8665 allocations: 1.13 MiB)
+# 1.077 ms (9546 allocations: 682.23 KiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 60
-# 6.225 ms (38931 allocations: 3.71 MiB)
+# 4.720 ms (39755 allocations: 2.57 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_72.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 72
-# 32.553 ms (172786 allocations: 17.56 MiB)
+# 20.894 ms (160216 allocations: 10.33 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_76.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 76
-# 98.943 ms (506149 allocations: 43.47 MiB)
+# 62.721 ms (437752 allocations: 27.47 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 81
-# 15.959 ms (101431 allocations: 7.84 MiB)
+# 12.219 ms (98127 allocations: 6.04 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_86.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 86
-# 197.990 ms (982014 allocations: 76.89 MiB)
+# 130.116 ms (815637 allocations: 50.09 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_102.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 102
-# 1.564 s (6035746 allocations: 468.39 MiB)
+# 882.543 ms (4497198 allocations: 275.63 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 132
-# 1.874 ms (9386 allocations: 1.61 MiB)
+# 1.189 ms (10143 allocations: 801.34 KiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "test_input_136.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
 @time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 136
-# 17.869 s (69048057 allocations: 4.19 GiB)
+# 10.355 s (44466044 allocations: 2.60 GiB)
+@btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+
+data = read_file(cur_day, "input_to_h.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_pos, vprops, full_graph = build_graph(data)
+@time astar(g, start_pos, key2node, door2neighbors, door2node, full_graph) == 1616
+# 2.046 s (280100 allocations: 322.94 MiB)
 @btime astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
 
 # g, key2node, door2node, door2neighbors, start_node = build_graph(data)
@@ -292,6 +308,20 @@ function part2()
     # paths = dijkstra_shortest_paths(g, name2int["YOU"])
     # paths.dists[paths.parents[name2int["SAN"]]] - 1
 end
+
+# 2019-12-25T21:20:37.707: max solution len: 1
+# 2019-12-25T21:20:39.68: max solution len: 2
+# 2019-12-25T21:20:43.019: max solution len: 3
+# 2019-12-25T21:20:48.656: max solution len: 4
+# 2019-12-25T21:21:04.174: max solution len: 5
+# 2019-12-25T21:21:24.548: max solution len: 6
+# 2019-12-25T21:21:53.972: max solution len: 7
+# 2019-12-25T21:22:16.234: max solution len: 8
+# 2019-12-25T21:22:38.516: max solution len: 9
+# 2019-12-25T21:24:41.97: max solution len: 10
+# 2019-12-25T21:25:59.464: max solution len: 11
+# 2019-12-25T21:26:04.195: max solution len: 12
+# 2019-12-25T21:32:55.222: max solution len: 13
 
 println(part1())
 # submit(part1(), cur_day, 1)
