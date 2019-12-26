@@ -53,11 +53,13 @@ function build_graph(data)
 end
 
 # DistCache = Dict{Set{Char}, Array{Int, 2}}
-DistCache = Dict{Tuple{Set{Char}, Set{Int}}, Tuple{Vector{Int}, Vector{Int}}}
+DistData = Tuple{Vector{Int}, Vector{Int}}
+DistCache = Dict{Tuple{Set{Char}, Set{Int}}, DistData}
 HeurCache = Dict{Vector{Int}, Int}
 GraphCache = Dict{Set{Char}, AbstractGraph}
 SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
 Dists = Array{Int, 2}
+NodeRepr = Tuple{Set{Int}, Set{Char}, Int}
 
 abstract type Node end
 
@@ -102,7 +104,7 @@ function get_avail_keys(dists::Vector{Int}, node::SingleNode, key2node)
     let2dist
 end
 
-function get_avail_keys(dists::Tuple{Vector{Int}, Vector{Int}}, node::MultiNode, key2node)
+function get_avail_keys(dists::DistData, node::MultiNode, key2node)
     let2dist = Dict(letter=>(dists[1][node], dists[2][node]) for (letter, node) in key2node if dists[1][node] < typemax(Int))
     let2dist
 end
@@ -181,7 +183,7 @@ function heuristic!(taken_keys::Vector{Char}, cur_poses::Vector{Int}, key2node, 
     # heur_cache[nodes_to_go]
 end
 
-function make_neighbor_repr(node::SingleNode, letter, dist, key2node)
+function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeRepr
     # todo: rewrite also this to keep multiple positions
     next_pos = key2node[letter]
     next_taken_keys = copy(node.taken_keys)
@@ -189,7 +191,7 @@ function make_neighbor_repr(node::SingleNode, letter, dist, key2node)
     Set(next_pos), Set(next_taken_keys), node.dist_so_far + dist
 end
 
-function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)
+function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::NodeRepr
     # todo: rewrite also this to keep multiple positions
     next_pos = key2node[letter]
     next_taken_keys = copy(node.taken_keys)
@@ -235,52 +237,14 @@ function make_init_node(start_poses::Vector{Int})
     MultiNode([], copy(g), start_poses, 0, typemax(Int) ÷ 10)
 end
 
-function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2node, full_graph)
+function astar(g::AbstractGraph, start_poses::Union{Int, Vector{Int}}, key2node, door2neighbors, door2node, full_graph)
     dist_cache = DistCache()
     sol_cache = SolCache()
     heur_cache = HeurCache()
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
-    open_configs = Set{Tuple{Set{Int}, Set{Char}, Int}}()  # set of tuples (position, set of taken keys, dist)
+    open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
     start_node = make_init_node(start_pos)
-    full_dists = floyd_warshall_shortest_paths(full_graph).dists
-    # maximum dist with some multiplicative margin
-    max_val = maximum([i for i in full_dists if i < typemax(Int)])
-    max_size = 0
-    for i in 1:size(full_dists)[1]
-        full_dists[i, i] = max_val * 100
-    end
-    target_len = length(key2node)
-    enqueue!(open_nodes, start_node, 1)
-    while !isempty(open_nodes)
-        @timeit to "dequeue" cur_node = dequeue!(open_nodes)
-        cur_node_len = length(cur_node.taken_keys)
-        @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
-        if cur_node_len == target_len
-            return cur_node.dist_so_far
-        end
-        if cur_node_len > max_size
-            verbose && println("$(Dates.now()): max solution len: $cur_node_len")
-            max_size = cur_node_len
-        end
-        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
-            door2neighbors, door2node, full_dists, heur_cache, open_configs)
-        for (dist, neighbor) in node_neighbors
-            f = neighbor.dist_so_far + neighbor.heur
-            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
-            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
-        end
-    end
-end
-
-function astar(g::AbstractGraph, start_poses::Vector{Int}, key2node, door2neighbors, door2node, full_graph)
-    dist_cache = DistCache()
-    sol_cache = SolCache()
-    heur_cache = HeurCache()
-    graph_cache = GraphCache()
-    open_nodes = PriorityQueue{Node, Int}()
-    open_configs = Set{Tuple{Int, Set{Char}, Int}}()  # set of tuples (position, set of taken keys, dist)
-    start_node = make_init_node(start_poses)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
@@ -336,15 +300,6 @@ function part2()
     data[start_pos[1]-1:start_pos[1]+1, start_pos[2]-1:start_pos[2]+1] = multi_robot_setting
     g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
     astar(g, start_poses, key2node, door2neighbors, door2node, full_graph)
-    # nodes = data |> flatten |> unique
-    # g = Graph(length(nodes))
-    # int2name = nodes |> enumerate |> Dict
-    # name2int = Dict(v=>k for (k, v) in int2name)
-    # for (node1, node2) in data
-    #     add_edge!(g, name2int[node1], name2int[node2])
-    # end
-    # paths = dijkstra_shortest_paths(g, name2int["YOU"])
-    # paths.dists[paths.parents[name2int["SAN"]]] - 1
 end
 
 # 2019-12-25T21:20:37.707: max solution len: 1
@@ -363,5 +318,5 @@ end
 #
 # println(part1())
 # # submit(part1(), cur_day, 1)
-# println(part2())
+println(part2())
 # # submit(part2(), cur_day, 2)

@@ -84,6 +84,6 @@ start_pos = findfirst(x->x=='@', data)
 multi_robot_setting = hcat(['@', '#', '@'], ['#', '#', '#'], ['@', '#', '@'])
 data[start_pos[1]-1:start_pos[1]+1, start_pos[2]-1:start_pos[2]+1] = multi_robot_setting
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
-@time astar(g, start_poses, key2node, door2neighbors, door2node, full_graph) == 3848
+@time astar(g, start_poses, key2node, door2neighbors, door2node, full_graph) == 24
 # 2.667 s (2581620 allocations: 582.86 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
