@@ -27,11 +27,10 @@ function build_graph(data)
         end
     end
 
-    start_nodes = Vector{Int}()
     for vertex in vertices(g)
         coords = get_prop(g, vertex, :coords)
         if data[coords] == '@'
-            push!(start_nodes, vertex)
+            start_node = vertex
         elseif Int('a') <= Int(data[coords]) <= Int('z')
             key2node[data[coords]] = vertex
         elseif Int('A') <= Int(data[coords]) <= Int('Z')
@@ -49,17 +48,41 @@ function build_graph(data)
         end
     end
 
-    g.graph, key2node, door2node, door2neighbors, start_nodes, g.vprops, full_graph
+    g.graph, key2node, door2node, door2neighbors, start_node, g.vprops, full_graph
 end
 
-# DistCache = Dict{Set{Char}, Array{Int, 2}}
+function build_graph_part_2(data)
+    start_pos = findfirst(x->x=='@', data)
+    multi_robot_setting = hcat(['@', '#', '@'], ['#', '#', '#'], ['@', '#', '@'])
+    data[start_pos[1]-1:start_pos[1]+1, start_pos[2]-1:start_pos[2]+1] = multi_robot_setting
+    data_1 = data[1:start_pos[1], 1:start_pos[2]]
+    data_2 = data[start_pos[1]:end, 1:start_pos[2]]
+    data_3 = data[1:start_pos[1], start_pos[2]:end]
+    data_4 = data[start_pos[1]:end, start_pos[2]:end]
+
+    g1, key2node1, door2node1, door2neighbors1, start_pos1, vprops1, _ = build_graph(data_1)
+    g2, key2node2, door2node2, door2neighbors2, start_pos2, vprops2, _ = build_graph(data_2)
+    g3, key2node3, door2node3, door2neighbors3, start_pos3, vprops3, _ = build_graph(data_3)
+    g4, key2node4, door2node4, door2neighbors4, start_pos4, vprops4, _ = build_graph(data_4)
+
+    gs = [g1, g2, g3, g4]
+    key2node = Dict{Char, Tuple{Int, Int}}()    # value is (num of graph, num of vertex)
+    key
+    start_poses = [start_pos1, start_pos2, start_pos3, start_pos4]
+
+
+    g.graph, key2node, door2node, door2neighbors, start_node, g.vprops, full_graph
+end
+
 DistData = Tuple{Vector{Int}, Vector{Int}}
-DistCache = Dict{Tuple{Set{Char}, Set{Int}}, DistData}
+DistCache = Dict{Tuple{Set{Char}, Set{Int}}, DistData}  # cache for (have_keys, cur_poses)
 HeurCache = Dict{Vector{Int}, Int}
 GraphCache = Dict{Set{Char}, AbstractGraph}
-SolCache = Dict{Tuple{Int, Set{Char}}, Int} # cache of shortest paths to goal from (cur_position, have_keys)
-Dists = Array{Int, 2}
 NodeRepr = Tuple{Set{Int}, Set{Char}, Int}
+
+DistCache2 = Dict{Tuple{Set{Char}, Vector{Int}}, DistData}  # cache for (have_keys, cur_poses)
+GraphCache2 = Dict{Set{Char}, Vector{AbstractGraph}}
+NodeRepr2 = Tuple{Vector{Int}, Set{Char}, Int}
 
 abstract type Node end
 
@@ -73,7 +96,7 @@ end
 
 struct MultiNode <: Node
     taken_keys::Vector{Char}
-    graph::SimpleGraph
+    graphs::Vector{SimpleGraph}
     cur_poses::Vector{Int}
     dist_so_far::Int
     heur::Int
@@ -237,13 +260,48 @@ function make_init_node(start_poses::Vector{Int})
     MultiNode([], copy(g), start_poses, 0, typemax(Int) ÷ 10)
 end
 
-function astar(g::AbstractGraph, start_poses::Union{Int, Vector{Int}}, key2node, door2neighbors, door2node, full_graph)
+function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2node)
     dist_cache = DistCache()
-    sol_cache = SolCache()
     heur_cache = HeurCache()
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
+    start_node = make_init_node(start_pos)
+    # maximum dist with some multiplicative margin
+    max_val = maximum([i for i in full_dists if i < typemax(Int)])
+    max_size = 0
+    for i in 1:size(full_dists)[1]
+        full_dists[i, i] = max_val * 100
+    end
+    target_len = length(key2node)
+    enqueue!(open_nodes, start_node, 1)
+    while !isempty(open_nodes)
+        @timeit to "dequeue" cur_node = dequeue!(open_nodes)
+        cur_node_len = length(cur_node.taken_keys)
+        @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
+        if cur_node_len == target_len
+            return cur_node.dist_so_far
+        end
+        if cur_node_len > max_size
+            verbose && println("$(Dates.now()): max solution len: $cur_node_len")
+            max_size = cur_node_len
+        end
+        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
+            door2neighbors, door2node, full_dists, heur_cache, open_configs)
+        for (dist, neighbor) in node_neighbors
+            f = neighbor.dist_so_far + neighbor.heur
+            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
+            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
+        end
+    end
+end
+
+function astar(gs::Vector{AbstractGraph}, start_poses::Vector{Int}, key2node, door2neighbors, door2node, full_graph)
+    dist_cache = DistCache2()
+    heur_cache = HeurCache()
+    graph_cache = GraphCache2()
+    open_nodes = PriorityQueue{Node, Int}()
+    open_configs = Set{NodeRepr2}()  # set of tuples (position, set of taken keys, dist)
     start_node = make_init_node(start_poses)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
@@ -295,9 +353,6 @@ function part1()
 end
 
 function part2()
-    start_pos = findfirst(x->x=='@', data)
-    multi_robot_setting = hcat(['@', '#', '@'], ['#', '#', '#'], ['@', '#', '@'])
-    data[start_pos[1]-1:start_pos[1]+1, start_pos[2]-1:start_pos[2]+1] = multi_robot_setting
     g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
     astar(g, start_poses, key2node, door2neighbors, door2node, full_graph)
 end
