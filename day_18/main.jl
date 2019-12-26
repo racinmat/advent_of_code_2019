@@ -89,11 +89,11 @@ function shortest_paths(node::SingleNode, dist_cache::DistCache)
 end
 
 function shortest_paths(node::MultiNode, dist_cache::DistCache)
-    dist_cache_key = (Set(node.taken_keys), Set(node.cur_poses))
+    @timeit to "shortest_paths cache key" dist_cache_key = (Set(node.taken_keys), Set(node.cur_poses))
     if !haskey(dist_cache, dist_cache_key)
-        dijkstra_results = hcat([dijkstra_shortest_paths(node.graph, pos).dists for pos in node.cur_poses]...)
-        dists = minimum(dijkstra_results, dims=2)[:, 1]
-        from_pos = argmin(dijkstra_results, dims=2) .|> (x->x[2]) |> x->x[:, 1]
+        @timeit to "dijkstra" dijkstra_results = hcat([dijkstra_shortest_paths(node.graph, pos).dists for pos in node.cur_poses]...)
+        @timeit to "dijkstra minimum" dists = minimum(dijkstra_results, dims=2)[:, 1]
+        @timeit to "dijkstra argmin" from_pos = argmin(dijkstra_results, dims=2) .|> (x->x[2]) |> x->x[:, 1]
         dist_cache[dist_cache_key] = (dists, from_pos)
     end
     dist_cache[dist_cache_key]
@@ -244,7 +244,7 @@ function astar(g::AbstractGraph, start_poses::Union{Int, Vector{Int}}, key2node,
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
-    start_node = make_init_node(start_pos)
+    start_node = make_init_node(start_poses)
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     # maximum dist with some multiplicative margin
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
