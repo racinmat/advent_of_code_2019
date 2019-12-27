@@ -60,10 +60,10 @@ function build_graph_part_2(data)
     data_3 = data[1:start_pos[1], start_pos[2]:end]
     data_4 = data[start_pos[1]:end, start_pos[2]:end]
 
-    g1, key2node1, door2node1, door2neighbors1, start_pos1, vprops1, _ = build_graph(data_1)
-    g2, key2node2, door2node2, door2neighbors2, start_pos2, vprops2, _ = build_graph(data_2)
-    g3, key2node3, door2node3, door2neighbors3, start_pos3, vprops3, _ = build_graph(data_3)
-    g4, key2node4, door2node4, door2neighbors4, start_pos4, vprops4, _ = build_graph(data_4)
+    g1, key2node1, door2node1, door2neighbors1, start_pos1, vprops1, full_g1 = build_graph(data_1)
+    g2, key2node2, door2node2, door2neighbors2, start_pos2, vprops2, full_g2 = build_graph(data_2)
+    g3, key2node3, door2node3, door2neighbors3, start_pos3, vprops3, full_g3 = build_graph(data_3)
+    g4, key2node4, door2node4, door2neighbors4, start_pos4, vprops4, full_g4 = build_graph(data_4)
 
     gs = [g1, g2, g3, g4]
     key2node = Dict{Char, Tuple{Int, Int}}()    # value is (num of graph, num of vertex)
@@ -86,7 +86,16 @@ function build_graph_part_2(data)
     end
     start_poses = [start_pos1, start_pos2, start_pos3, start_pos4]
 
-    gs, key2node, door2node, door2neighbors, start_poses
+    graph2door = Dict{Int, Set{Char}}()
+    for (letter, (num, pos)) in door2node
+        if !haskey(graph2door, num)
+            graph2door[num] = Set(letter)
+        end
+        push!(graph2door[num], letter)
+    end
+
+    full_gs = [full_g1, full_g2, full_g3, full_g4]
+    gs, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs
 end
 
 DistCache = Dict{Tuple{Set{Char}, Int}, Vector{Int}}  # cache for (have_keys, cur_pos)
@@ -97,6 +106,7 @@ NodeRepr = Tuple{Set{Int}, Set{Char}, Int}
 DistCache2 = Dict{Tuple{Int, Set{Char}, Int}, Vector{Int}}  # cache for (graph_num, have_keys, cur_pos)
 GraphCache2 = Dict{Tuple{Int, Set{Char}}, AbstractGraph}
 NodeRepr2 = Tuple{Vector{Int}, Set{Char}, Int}
+HeurCache2 = Dict{Tuple{Int, Set{Int}}, Int}
 
 abstract type Node end
 
@@ -125,10 +135,10 @@ function shortest_paths(node::SingleNode, dist_cache::DistCache)
     dist_cache[dist_cache_key]
 end
 
-function shortest_paths(node::MultiNode, dist_cache::DistCache2, door2node)
+function shortest_paths(node::MultiNode, dist_cache::DistCache2, door2node, graph2door)
     all_dists = Vector{Vector{Int}}(undef, length(node.graphs))
     for (i, (graph, cur_pos)) in enumerate(zip(node.graphs, node.cur_poses))
-        @timeit to "shortest_paths cache key" dist_cache_key = (i, Set(key for key in node.taken_keys if door2node[uppercase(key)][1] == i), cur_pos)
+        @timeit to "shortest_paths cache key" dist_cache_key = (i, Set(key for key in node.taken_keys if uppercase(key) ∈ graph2door[i]), cur_pos)
         if !haskey(dist_cache, dist_cache_key)
             @timeit to "dijkstra" states = dijkstra_shortest_paths(graph, cur_pos)
             @timeit to "copy(states.dists)" dists = copy(states.dists)
@@ -158,7 +168,7 @@ function build_neighbor(node::SingleNode, next_key::Char, dist_traveled, key2nod
     cache_key = Set(next_taken_keys)
     if !haskey(graph_cache, cache_key)
         @timeit to "copy(node.graph)" next_graph = copy(node.graph)
-        @timeit to "uppercase(next_key))" next_door = uppercase(next_key)
+        next_door = uppercase(next_key)
         @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
             for neighbor in door2neighbors[next_door]
                 add_edge!(next_graph, door2node[next_door], neighbor)
@@ -172,18 +182,18 @@ function build_neighbor(node::SingleNode, next_key::Char, dist_traveled, key2nod
 end
 
 function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx, key2node, door2neighbors, door2node,
-        graph_cache, heur_cache)
+        graph_cache, heur_cache, graph2door, full_gs)
     next_pos = key2node[next_key][2]
     @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
     # copying graph is costly, both time and memory-wise
     push!(next_taken_keys, next_key)
     next_graphs = Vector{SimpleGraph}(undef, length(node.graphs))
     for (i, graph) in enumerate(node.graphs)
-        cache_key = (i, Set(key for key in next_taken_keys if haskey(door2node, uppercase(key)) && door2node[uppercase(key)][1] == i))
+        cache_key = (i, Set(key for key in next_taken_keys if uppercase(letter) ∈ door2node[i]))
         if !haskey(graph_cache, cache_key)
             @timeit to "copy(node.graph)" next_graph = copy(graph)
-            @timeit to "uppercase(next_key))" next_door = uppercase(next_key)
-            @timeit to "modifying graph" if haskey(door2neighbors, next_door) && door2neighbors[next_door][1] == i   # for the last key there is no door
+            next_door = uppercase(next_key)
+            @timeit to "modifying graph" if next_door ∈ graph2door[i]
                 next_door_part, next_door_neighbors = door2neighbors[next_door]
                 door_node = door2node[next_door]
                 for neighbor in next_door_neighbors
@@ -196,7 +206,7 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
     end
     next_poses = copy(node.cur_poses)
     next_poses[from_idx] = next_pos
-    @timeit to "calc_heuristic" h_val = 0   # maybe sum of spanning trees would be worth, but I'm too lazy
+    @timeit to "calc_heuristic" h_val = heuristic!(taken_keys, next_poses, key2node, full_gs, heur_cache)
     # todo: here adjust the update of positions and dist by cached dists
     MultiNode(next_taken_keys, next_graphs, next_poses, node.dist_so_far + dist_traveled, min(h_val, node.heur))
 end
@@ -212,6 +222,29 @@ function heuristic!(taken_keys::Vector{Char}, cur_pos::Int, key2node, full_dists
         heur_cache[nodes_to_go] = mst_sum
     end
     heur_cache[nodes_to_go]
+end
+
+# based on minimal spanning tree
+function heuristic!(taken_keys::Vector{Char}, cur_poses::Vector{Int}, key2node, full_gs, heur_cache)
+    # todo: split per each graph and sum results
+    heur_sum = 0
+    for i in 1:length(cur_poses)
+        cur_pos = cur_poses[i]
+        nodes_in_graph = [(key, pos) for (key, (part, pos)) in key2node if part == i]
+        @timeit to "nodes_to_go" nodes_to_go = [pos for (key, pos) in key2node if i ∉ taken_keys]
+        if isempty(nodes_to_go)    # heur is sum and thus nothing is added
+            continue
+        end
+        @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
+        if !haskey(heur_cache, nodes_to_go)
+            @timeit to "obtain key_dists" keys_dists = full_gs[i][nodes_to_go, nodes_to_go]
+            @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
+            # todo: modify heur cache
+            heur_cache[(i, Set(nodes_to_go))] = mst_sum
+        end
+        heur_sum += heur_cache[nodes_to_go]
+    end
+    heur_sum
 end
 
 function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeRepr
@@ -232,10 +265,12 @@ function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::
     copy(next_poses), Set(next_taken_keys), node.dist_so_far + dist
 end
 
-function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists, heur_cache, open_configs)
+function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists,
+        heur_cache, open_configs)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache, door2node)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
+    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, open_configs,
+        avail_keys, graph_cache, full_dists, heur_cache)
     for (letter, neighbor_repr) in neighbor_reprs
         if neighbor_repr ∉ open_configs
             push!(open_configs, neighbor_repr)
@@ -244,10 +279,12 @@ function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door
     neighbors
 end
 
-function get_neighbors(node::MultiNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, heur_cache, open_configs)
-    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
+function get_neighbors(node::MultiNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, heur_cache,
+        open_configs, graph2door, full_gs)
+    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache, door2node, graph2door)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, open_configs, avail_keys, graph_cache, heur_cache)
+    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, door2neighbors,
+        door2node, open_configs, avail_keys, graph_cache, heur_cache, graph2door, full_gs)
     for (letter, neighbor_repr) in neighbor_reprs
         if neighbor_repr ∉ open_configs
             push!(open_configs, neighbor_repr)
@@ -264,19 +301,20 @@ function prepare_neighbors(node::SingleNode, key2node, open_configs, avail_keys,
     neighbors, neighbor_reprs
 end
 
-function prepare_neighbors(node::MultiNode, key2node, open_configs, avail_keys, graph_cache, heur_cache)
+function prepare_neighbors(node::MultiNode, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, heur_cache,
+        graph2door, full_gs)
     @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, from_idx, key2node) for (letter, (dist, from_idx)) in avail_keys)
     @timeit to "build_neighbor arr" neighbors = [
-        (dist, build_neighbor(node, letter, dist, from_idx, key2node, door2neighbors, door2node, graph_cache, heur_cache))
-        for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
+        (dist, build_neighbor(node, letter, dist, from_idx, key2node, door2neighbors, door2node, graph_cache,
+            heur_cache, graph2door, full_gs)) for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
     neighbors, neighbor_reprs
 end
 
-function make_init_node(start_pos::Int)
+function make_init_node(g, start_pos::Int)
     SingleNode([], copy(g), start_pos, 0, typemax(Int) ÷ 10)
 end
 
-function make_init_node(start_poses::Vector{Int})
+function make_init_node(g, start_poses::Vector{Int})
     MultiNode([], copy(g), start_poses, 0, typemax(Int) ÷ 10)
 end
 
@@ -286,7 +324,7 @@ function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
-    start_node = make_init_node(start_pos)
+    start_node = make_init_node(g, start_pos)
     # maximum dist with some multiplicative margin
     full_dists = floyd_warshall_shortest_paths(full_graph).dists
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
@@ -317,13 +355,14 @@ function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2
     end
 end
 
-function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, door2neighbors, door2node)
+function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, door2neighbors, door2node, graph2door,
+        full_gs)
     dist_cache = DistCache2()
-    heur_cache = HeurCache()
+    heur_cache = HeurCache2()
     graph_cache = GraphCache2()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr2}()  # set of tuples (position, set of taken keys, dist)
-    start_node = make_init_node(start_poses)
+    start_node = make_init_node(gs, start_poses)
     # maximum dist with some multiplicative margin
     max_size = 0
     target_len = length(key2node)
@@ -340,7 +379,7 @@ function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, 
             max_size = cur_node_len
         end
         @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
-            door2neighbors, door2node, heur_cache, open_configs)
+            door2neighbors, door2node, heur_cache, open_configs, graph2door, full_gs)
         for (dist, neighbor) in node_neighbors
             f = neighbor.dist_so_far + neighbor.heur
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
@@ -369,8 +408,8 @@ function part1()
 end
 
 function part2()
-    g, key2node, door2node, door2neighbors, start_poses = build_graph_part_2(data)
-    astar(g, start_poses, key2node, door2neighbors, door2node)
+    g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build_graph_part_2(data)
+    astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 end
 
 # 2019-12-25T21:20:37.707: max solution len: 1
@@ -389,5 +428,5 @@ end
 #
 # println(part1())
 # # submit(part1(), cur_day, 1)
-# println(part2())
+println(part2())
 # # submit(part2(), cur_day, 2)
