@@ -82,23 +82,23 @@ g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_
 data = read_file(cur_day, "test_input_24.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build_graph_part_2(data)
 @time astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs) == 24
-# 225.300 μs (2501 allocations: 162.63 KiB)
+# 282.300 μs (3172 allocations: 181.84 KiB)
 @btime astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 
 data = read_file(cur_day, "input_to_h.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build_graph_part_2(data)
 @time astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs) == 1136
-# 51.907 ms (147259 allocations: 33.59 MiB)
+# 217.700 ms (89814 allocations: 46.50 MiB)
 @btime astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 
 data = read_file(cur_day, "input_to_q.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build_graph_part_2(data)
 @time astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs) == 1898
-# 1.231 s (4437745 allocations: 484.24 MiB)
+# 1.230 s (6872589 allocations: 413.36 MiB)
 @btime astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 
 data = read_file(cur_day, "input_to_u.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build_graph_part_2(data)
 @time astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs) == 2006
-# 33.456 s (119564084 allocations: 8.90 GiB)
+# 41.071 s (212560860 allocations: 11.47 GiB)
 @btime astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)

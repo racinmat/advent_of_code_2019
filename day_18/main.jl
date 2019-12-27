@@ -179,7 +179,7 @@ function build_neighbor(node::SingleNode, next_key::Char, dist_traveled, key2nod
 end
 
 function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx, key2node, door2neighbors, door2node,
-        graph_cache, heur_cache, graph2door, full_gs)
+        graph_cache, heur_cache, graph2door, full_dists)
     next_pos = key2node[next_key][2]
     @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
     # copying graph is costly, both time and memory-wise
@@ -203,7 +203,8 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
     end
     next_poses = copy(node.cur_poses)
     next_poses[from_idx] = next_pos
-    @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_poses, key2node, full_gs, heur_cache)
+    # @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_poses, key2node, full_dists, heur_cache)
+    h_val = heuristic!(next_taken_keys, next_poses, key2node, full_dists, heur_cache)
     # todo: here adjust the update of positions and dist by cached dists
     MultiNode(next_taken_keys, next_graphs, next_poses, node.dist_so_far + dist_traveled, min(h_val, node.heur))
 end
@@ -222,30 +223,28 @@ function heuristic!(taken_keys::Vector{Char}, cur_pos::Int, key2node, full_dists
 end
 
 # based on minimal spanning tree
-function heuristic!(taken_keys::Vector{Char}, cur_poses::Vector{Int}, key2node, full_gs, heur_cache)
-    # todo: split per each graph and sum results
+function heuristic!(taken_keys::Vector{Char}, cur_poses::Vector{Int}, key2node, full_dists, heur_cache)
     heur_sum = 0
     for i in 1:length(cur_poses)
         cur_pos = cur_poses[i]
         nodes_in_graph = [(key, pos) for (key, (part, pos)) in key2node if part == i]
-        @timeit to "nodes_to_go" nodes_to_go = [pos for (key, pos) in key2node if i ∉ taken_keys]
+        @timeit to "nodes_to_go" nodes_to_go = [pos for (key, pos) in nodes_in_graph if i ∉ taken_keys]
         if isempty(nodes_to_go)    # heur is sum and thus nothing is added
             continue
         end
         @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
-        if !haskey(heur_cache, nodes_to_go)
-            @timeit to "obtain key_dists" keys_dists = full_gs[i][nodes_to_go, nodes_to_go]
+        cache_key = (i, Set(nodes_to_go))
+        if !haskey(heur_cache, cache_key)
+            @timeit to "obtain key_dists" keys_dists = full_dists[i][nodes_to_go, nodes_to_go]
             @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
-            # todo: modify heur cache
-            heur_cache[(i, Set(nodes_to_go))] = mst_sum
+            heur_cache[cache_key] = mst_sum
         end
-        heur_sum += heur_cache[nodes_to_go]
+        heur_sum += heur_cache[cache_key]
     end
     heur_sum
 end
 
 function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeRepr
-    # todo: rewrite also this to keep multiple positions
     next_pos = key2node[letter]
     next_taken_keys = copy(node.taken_keys)
     push!(next_taken_keys, letter)
@@ -253,7 +252,6 @@ function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeRepr
 end
 
 function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::NodeRepr2
-    # todo: rewrite also this to keep multiple positions
     next_pos = key2node[letter][2]
     next_taken_keys = copy(node.taken_keys)
     push!(next_taken_keys, letter)
@@ -277,11 +275,11 @@ function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door
 end
 
 function get_neighbors(node::MultiNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, heur_cache,
-        open_configs, graph2door, full_gs)
+        open_configs, graph2door, full_dists)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache, door2node, graph2door)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
     @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, door2neighbors,
-        door2node, open_configs, avail_keys, graph_cache, heur_cache, graph2door, full_gs)
+        door2node, open_configs, avail_keys, graph_cache, heur_cache, graph2door, full_dists)
     for (letter, neighbor_repr) in neighbor_reprs
         if neighbor_repr ∉ open_configs
             push!(open_configs, neighbor_repr)
@@ -299,10 +297,10 @@ function prepare_neighbors(node::SingleNode, key2node, open_configs, avail_keys,
 end
 
 function prepare_neighbors(node::MultiNode, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, heur_cache,
-        graph2door, full_gs)
+        graph2door, full_dists)
     @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, from_idx, key2node) for (letter, (dist, from_idx)) in avail_keys)
     neighbors = [(dist, build_neighbor(node, letter, dist, from_idx, key2node, door2neighbors, door2node, graph_cache,
-        heur_cache, graph2door, full_gs)) for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
+        heur_cache, graph2door, full_dists)) for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
     neighbors, neighbor_reprs
 end
 
@@ -359,6 +357,7 @@ function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, 
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr2}()  # set of tuples (position, set of taken keys, dist)
     start_node = make_init_node(gs, start_poses)
+    full_dists = [floyd_warshall_shortest_paths(full_g).dists for full_g in full_gs]
     # maximum dist with some multiplicative margin
     max_size = 0
     target_len = length(key2node)
@@ -375,7 +374,7 @@ function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, 
             max_size = cur_node_len
         end
         @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
-            door2neighbors, door2node, heur_cache, open_configs, graph2door, full_gs)
+            door2neighbors, door2node, heur_cache, open_configs, graph2door, full_dists)
         for (dist, neighbor) in node_neighbors
             f = neighbor.dist_so_far + neighbor.heur
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
@@ -408,21 +407,28 @@ function part2()
     astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 end
 
-# 2019-12-25T21:20:37.707: max solution len: 1
-# 2019-12-25T21:20:39.68: max solution len: 2
-# 2019-12-25T21:20:43.019: max solution len: 3
-# 2019-12-25T21:20:48.656: max solution len: 4
-# 2019-12-25T21:21:04.174: max solution len: 5
-# 2019-12-25T21:21:24.548: max solution len: 6
-# 2019-12-25T21:21:53.972: max solution len: 7
-# 2019-12-25T21:22:16.234: max solution len: 8
-# 2019-12-25T21:22:38.516: max solution len: 9
-# 2019-12-25T21:24:41.97: max solution len: 10
-# 2019-12-25T21:25:59.464: max solution len: 11
-# 2019-12-25T21:26:04.195: max solution len: 12
-# 2019-12-25T21:32:55.222: max solution len: 13
-#
+# 2019-12-27T00:51:07.944: max solution len: 1
+# 2019-12-27T00:51:07.961: max solution len: 2
+# 2019-12-27T00:51:07.964: max solution len: 3
+# 2019-12-27T00:51:07.969: max solution len: 4
+# 2019-12-27T00:51:07.974: max solution len: 5
+# 2019-12-27T00:51:07.985: max solution len: 6
+# 2019-12-27T00:51:08.056: max solution len: 7
+# 2019-12-27T00:51:08.124: max solution len: 8
+# 2019-12-27T00:51:08.363: max solution len: 9
+# 2019-12-27T00:51:08.524: max solution len: 10
+# 2019-12-27T00:51:09.447: max solution len: 11
+# 2019-12-27T00:51:10.261: max solution len: 12
+# 2019-12-27T00:51:11.303: max solution len: 13
+# 2019-12-27T00:51:16.996: max solution len: 14
+# 2019-12-27T00:51:20.228: max solution len: 15
+# 2019-12-27T00:51:25.304: max solution len: 16
+# 2019-12-27T00:51:33.706: max solution len: 17
+# 2019-12-27T00:53:34.139: max solution len: 18
+# 2019-12-27T00:55:14.484: max solution len: 19
+# 2019-12-27T00:57:39.067: max solution len: 20
+# 2019-12-27T01:06:13.375: max solution len: 21
 # println(part1())
 # # submit(part1(), cur_day, 1)
-# println(part2())
+println(part2())
 # # submit(part2(), cur_day, 2)
