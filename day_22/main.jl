@@ -3,10 +3,14 @@ quickactivate(@__DIR__)
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = read_input(cur_day)
+data = cur_day |> read_input |> x->split(x, '\n')
+
+function process_instruction(deck, row)
+    # todo: implement me
+end
 
 function part1()
-    data
+    cards
 end
 
 function part2()
