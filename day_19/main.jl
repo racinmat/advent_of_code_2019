@@ -38,13 +38,16 @@ function part2()
     tot_sum
 end
 
-function fill_grid(grid_size)
+function fill_grid(grid_size, offset=CartesianIndex(0, 0))
     # exploration of beam to see how big array should I make
     grid = zeros(Int, grid_size, grid_size)
     tot_sum = 0
     for i in CartesianIndices(grid)
         x, y = Tuple(i)
         if x > y
+            continue
+        end
+        if x < y ÷ 1.5 |> Int
             continue
         end
         channel_in = Channel(2)
@@ -85,8 +88,54 @@ function fill_grid_heur(grid_size)
     grid
 end
 
-@time fill_grid(200)
+function sum_minor_diag(data, diag_start)
+    # exploration of beam to see how big array should I make
+    tot_sum = 0
+    for i in minor_diag_indices(diag_start)
+        x, y = Tuple(i)
+        if x > y
+            continue
+        end
+        if x < y ÷ 1.5 |> Int
+            continue
+        end
+        channel_in = Channel(2)
+        channel_out = Channel(1)
+        program = @async run_program!(copy(data), channel_in, channel_out)
+        put!(channel_in, x - 1)
+        put!(channel_in, y - 1)
+        cell_type = take!(channel_out)
+        tot_sum += cell_type
+    end
+    tot_sum
+end
 
+test_data = cur_day |> test_input |> x->rstrip(x, '\n') |> x->replace(x, "."=>"0") |> x->replace(x, "#"=>"1") |> x->split(x, '\n') .|> collect .|>
+    (x->parse.(Int, x)) |> x->hcat(x...) |> x->x'
+
+# target_size = 100
+target_size = 10
+coarse_idxs = collect(Int(round(1.4^i)) for i in 1:25)
+# coarse_search_sums = [sum_minor_diag(i) for i in coarse_idxs]
+coarse_search_sums = [sum(test_data[minor_diag_indices(i, grid_size)]) for i in coarse_idxs]
+from_idx = findlast(x->x<=target_size, coarse_search_sums)
+to_idx = findfirst(x->x>=target_size, coarse_search_sums)
+fine_range = coarse_idxs[to_idx]-coarse_idxs[from_idx]
+
+fine_search_sum = [sum_minor_diag(i) for i in coarse_idxs[from_idx]:coarse_idxs[to_idx]]
+first_target_sum = findfirst(x->x==target_size, fine_search_sum) + coarse_idxs[from_idx] - 1
+square_corner_x = first_target_sum ÷ 2
+square_corner_y = first_target_sum - square_corner_x
+
+maximum([sum_minor_diag(i) for i in 00:2000])
+[sum_minor_diag(i) for i in 1:500]
+[sum(grid[minor_diag_indices(i, grid_size)]) for i in 1:500]
+[sum_minor_diag(i) == sum(grid[minor_diag_indices(i, grid_size)]) for i in 1:500]
+all([sum_minor_diag(i) == sum(grid[minor_diag_indices(i, grid_size)]) for i in 1:500])
+
+@time fill_grid(500)
+
+grid = fill_grid(500)
 grid_size = size(grid)[1]
 for i in 1:200
     print(sum(grid[minor_diag_indices(i, grid_size)]))
@@ -119,7 +168,7 @@ maximum(sum(grid[minor_diag_indices(i, grid_size)]) for i in 1:grid_size)
 using Images
 save("day-19-img.png", colorview(Gray, convert.(Float64, grid)))
 
-grid_heur = fill_grid_heur(grid_size)
+grid_heur = fill_grid_heur(500)
 save("day-19-heur-img.png", colorview(Gray, convert.(Float64, grid_heur ./ 2)))
 
 println(part1())
