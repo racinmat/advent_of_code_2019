@@ -86,11 +86,8 @@ function build_graph_part_2(data)
     end
     start_poses = [start_pos1, start_pos2, start_pos3, start_pos4]
 
-    graph2door = Dict{Int, Set{Char}}()
+    graph2door = Dict{Int, Set{Char}}(1=>Set(), 2=>Set(), 3=>Set(), 4=>Set())
     for (letter, (num, pos)) in door2node
-        if !haskey(graph2door, num)
-            graph2door[num] = Set(letter)
-        end
         push!(graph2door[num], letter)
     end
 
@@ -193,7 +190,7 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
         if !haskey(graph_cache, cache_key)
             @timeit to "copy(node.graph)" next_graph = copy(graph)
             next_door = uppercase(next_key)
-            @timeit to "modifying graph" if next_door ∈ graph2door[i]
+            if next_door ∈ graph2door[i]
                 next_door_part, next_door_neighbors = door2neighbors[next_door]
                 door_node = door2node[next_door]
                 for neighbor in next_door_neighbors
@@ -206,7 +203,7 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
     end
     next_poses = copy(node.cur_poses)
     next_poses[from_idx] = next_pos
-    @timeit to "calc_heuristic" h_val = heuristic!(taken_keys, next_poses, key2node, full_gs, heur_cache)
+    @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_poses, key2node, full_gs, heur_cache)
     # todo: here adjust the update of positions and dist by cached dists
     MultiNode(next_taken_keys, next_graphs, next_poses, node.dist_so_far + dist_traveled, min(h_val, node.heur))
 end
