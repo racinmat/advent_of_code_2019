@@ -407,28 +407,7 @@ function part2()
     astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 end
 
-# 2019-12-27T00:51:07.944: max solution len: 1
-# 2019-12-27T00:51:07.961: max solution len: 2
-# 2019-12-27T00:51:07.964: max solution len: 3
-# 2019-12-27T00:51:07.969: max solution len: 4
-# 2019-12-27T00:51:07.974: max solution len: 5
-# 2019-12-27T00:51:07.985: max solution len: 6
-# 2019-12-27T00:51:08.056: max solution len: 7
-# 2019-12-27T00:51:08.124: max solution len: 8
-# 2019-12-27T00:51:08.363: max solution len: 9
-# 2019-12-27T00:51:08.524: max solution len: 10
-# 2019-12-27T00:51:09.447: max solution len: 11
-# 2019-12-27T00:51:10.261: max solution len: 12
-# 2019-12-27T00:51:11.303: max solution len: 13
-# 2019-12-27T00:51:16.996: max solution len: 14
-# 2019-12-27T00:51:20.228: max solution len: 15
-# 2019-12-27T00:51:25.304: max solution len: 16
-# 2019-12-27T00:51:33.706: max solution len: 17
-# 2019-12-27T00:53:34.139: max solution len: 18
-# 2019-12-27T00:55:14.484: max solution len: 19
-# 2019-12-27T00:57:39.067: max solution len: 20
-# 2019-12-27T01:06:13.375: max solution len: 21
-# println(part1())
+println(part1())
 # # submit(part1(), cur_day, 1)
 println(part2())
 # # submit(part2(), cur_day, 2)
