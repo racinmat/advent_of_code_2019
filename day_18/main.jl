@@ -189,7 +189,7 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
     push!(next_taken_keys, next_key)
     next_graphs = Vector{SimpleGraph}(undef, length(node.graphs))
     for (i, graph) in enumerate(node.graphs)
-        cache_key = (i, Set(key for key in next_taken_keys if uppercase(letter) ∈ door2node[i]))
+        cache_key = (i, Set(key for key in next_taken_keys if uppercase(key) ∈ graph2door[i]))
         if !haskey(graph_cache, cache_key)
             @timeit to "copy(node.graph)" next_graph = copy(graph)
             next_door = uppercase(next_key)
@@ -267,7 +267,7 @@ end
 
 function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists,
         heur_cache, open_configs)
-    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache, door2node)
+    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
     @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, open_configs,
         avail_keys, graph_cache, full_dists, heur_cache)
@@ -304,9 +304,8 @@ end
 function prepare_neighbors(node::MultiNode, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, heur_cache,
         graph2door, full_gs)
     @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, from_idx, key2node) for (letter, (dist, from_idx)) in avail_keys)
-    @timeit to "build_neighbor arr" neighbors = [
-        (dist, build_neighbor(node, letter, dist, from_idx, key2node, door2neighbors, door2node, graph_cache,
-            heur_cache, graph2door, full_gs)) for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
+    neighbors = [(dist, build_neighbor(node, letter, dist, from_idx, key2node, door2neighbors, door2node, graph_cache,
+        heur_cache, graph2door, full_gs)) for (letter, (dist, from_idx)) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
     neighbors, neighbor_reprs
 end
 
@@ -428,5 +427,5 @@ end
 #
 # println(part1())
 # # submit(part1(), cur_day, 1)
-println(part2())
+# println(part2())
 # # submit(part2(), cur_day, 2)
