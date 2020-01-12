@@ -51,6 +51,114 @@ function build_graph(data)
     g.graph, key2node, door2node, door2neighbors, start_node, g.vprops, full_graph
 end
 
+function build_graph_2(data)
+    g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
+    g = MetaGraph(g)
+    start_node = 0
+    key2node = Dict{Char, Int}()
+    door2node = Dict{Char, Int}()
+    door2neighbors = Dict{Char, Vector{Int}}()
+    for (i, j) in enumerate(CartesianIndices(data))
+        set_prop!(g, i, :coords, j)
+    end
+
+    for vertex in nv(g):-1:1
+        coords = get_prop(g, vertex, :coords)
+        if data[coords] == '#'
+            rem_vertex!(g, vertex)
+        end
+    end
+
+    for vertex in vertices(g)
+        coords = get_prop(g, vertex, :coords)
+        if data[coords] == '@'
+            start_node = vertex
+            global start_node = vertex
+        elseif Int('a') <= Int(data[coords]) <= Int('z')
+            key2node[data[coords]] = vertex
+        elseif Int('A') <= Int(data[coords]) <= Int('Z')
+            door2node[data[coords]] = vertex
+        end
+    end
+
+    ## building smaller graph
+    num_nodes = 1+length(key2node)+length(door2node)
+    # num_nodes = 1+length(key2node)
+    small_g = MetaGraph(SimpleGraph(num_nodes), 1.)
+    start_node_new = 1
+    key2node_small = Dict(key => 1+val for (val, key) in enumerate(keys(key2node)))
+    door2node_small = Dict(key => 1+length(key2node)+val for (val, key) in enumerate(keys(door2node)))
+    small2g = Dict(1=>start_node)
+    g2small = Dict(start_node=>1)
+    for key in keys(key2node)
+        small2g[key2node_small[key]] = key2node[key]
+        g2small[key2node[key]] = key2node_small[key]
+    end
+    for door in keys(door2node)
+        small2g[door2node_small[door]] = door2node[door]
+        g2small[door2node[door]] = door2node_small[door]
+    end
+    # adding start to key and doors edges
+    for (small_node, node) in small2g
+        node = collect(values(small2g))[1]
+        node2others = dijkstra_shortest_paths(g, node)
+        for (small_other, other) in small2g
+            if node == other
+                continue
+            end
+            # check about doors in path
+            other = collect(values(small2g))[2]
+            small_other = 2
+            iter = node2others.parents[other]
+            no_doors = true
+            goal_node = other
+            small_goal_node = small_other
+            dist_so_far = 1
+            while iter != node
+                if iter ∈ values(door2node)
+                    println(first(filter(x->x[2] == iter, door2node)))
+                    global door, door_node = first(filter(x->x[2] == iter, door2node))
+                    global small_door_node = g2small[door_node]
+                    println(door)
+                    global no_doors = false
+
+                    add_edge!(small_g, small_door_node, small_goal_node)
+                    set_prop!(small_g, small_door_node, small_goal_node, :weight, dist_so_far)
+                    println(door, " ", dist_so_far)
+                    global goal_node = door_node
+                    global small_goal_node = small_door_node
+                end
+                global iter = node2others.parents[iter]
+                global dist_so_far += 1
+            end
+            println(dist_so_far, ' ', node2others.dists[other])
+
+            if no_doors
+                add_edge!(small_g, small_node, small_other)
+                set_prop!(small_g, small_node, small_other, :weight, node2others.dists[other])
+                println("start ", node2others.dists[other])
+            else
+                add_edge!(small_g, small_node, small_goal_node)
+                set_prop!(small_g, small_node, small_goal_node, :weight, dist_so_far)
+                println("start ", dist_so_far)
+            end
+        end
+    end
+
+    # need to remap vertices, theirs numbering is changed after removal
+    full_graph = copy(g.graph)
+
+    for (letter, node) in door2node
+        neighbors_list = neighbors(g, node) |> collect
+        door2neighbors[letter] = neighbors_list
+        for n in neighbors_list
+            rem_edge!(g, node, n)
+        end
+    end
+
+    g, key2node, door2node, door2neighbors, start_node, full_graph
+end
+
 function build_graph_part_2(data)
     start_pos = findfirst(x->x=='@', data)
     multi_robot_setting = hcat(['@', '#', '@'], ['#', '#', '#'], ['@', '#', '@'])
@@ -313,6 +421,43 @@ function make_init_node(g, start_poses::Vector{Int})
 end
 
 function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2node, full_graph)
+    dist_cache = DistCache()
+    heur_cache = HeurCache()
+    graph_cache = GraphCache()
+    open_nodes = PriorityQueue{Node, Int}()
+    open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
+    start_node = make_init_node(g, start_pos)
+    # maximum dist with some multiplicative margin
+    @timeit to "init_floyd_warshall" full_dists = floyd_warshall_shortest_paths(full_graph).dists
+    max_val = maximum([i for i in full_dists if i < typemax(Int)])
+    max_size = 0
+    for i in 1:size(full_dists)[1]
+        full_dists[i, i] = max_val * 100
+    end
+    target_len = length(key2node)
+    enqueue!(open_nodes, start_node, 1)
+    while !isempty(open_nodes)
+        @timeit to "dequeue" cur_node = dequeue!(open_nodes)
+        cur_node_len = length(cur_node.taken_keys)
+        @debug "dequeued node: $(cur_node.taken_keys |> join) with dist_so_far: $(cur_node.dist_so_far |> join)"
+        if cur_node_len == target_len
+            return cur_node.dist_so_far
+        end
+        if cur_node_len > max_size
+            verbose && println("$(Dates.now()): max solution len: $cur_node_len")
+            max_size = cur_node_len
+        end
+        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
+            door2neighbors, door2node, full_dists, heur_cache, open_configs)
+        for (dist, neighbor) in node_neighbors
+            f = neighbor.dist_so_far + neighbor.heur
+            @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
+            @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
+        end
+    end
+end
+
+function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2node, full_graph)
     dist_cache = DistCache()
     heur_cache = HeurCache()
     graph_cache = GraphCache()
