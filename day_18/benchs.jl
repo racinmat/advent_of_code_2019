@@ -5,11 +5,19 @@ include(projectdir("misc.jl"))
 include(projectdir("day_18", "main.jl"))
 
 with_logger(my_debug_logger) do
-    astar(g, start_pos, key2node, door2neighbors, door2node, full_graph)
+    astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+end
+
+with_logger(my_debug_logger) do
+    astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 end
 
 to = TimerOutput()
 astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+display(to)
+
+to = TimerOutput()
+astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 display(to)
 
 to = TimerOutput()
@@ -20,44 +28,65 @@ display(to)
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 44
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 44
 # 1.077 ms (9546 allocations: 682.23 KiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_60.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 60
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 60
 # 4.720 ms (39755 allocations: 2.57 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_72.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 72
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 60
 # 20.894 ms (160216 allocations: 10.33 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_76.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 76
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 76
 # 62.721 ms (437752 allocations: 27.47 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_81.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 81
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 81
 # 12.219 ms (98127 allocations: 6.04 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_86.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 86
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 86
 # 130.116 ms (815637 allocations: 50.09 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_102.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 102
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 102
 # 882.543 ms (4497198 allocations: 275.63 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_132.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
@@ -71,15 +100,56 @@ g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_
 # 10.355 s (44466044 allocations: 2.60 GiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
 
+data = read_file(cur_day, "input_to_d.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+@time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 1162
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 1162
+# 2.046 s (280100 allocations: 322.94 MiB)
+@btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
+
 data = read_file(cur_day, "input_to_h.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 1616
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 1616
 # 2.046 s (280100 allocations: 322.94 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
+
+data = read_file(cur_day, "input_to_i.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+@time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 1696
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 1696
+# 2.046 s (280100 allocations: 322.94 MiB)
+@btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
+
+data = read_file(cur_day, "input_to_j.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+@time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 2572
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 2572
+# 2.046 s (280100 allocations: 322.94 MiB)
+@btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
+
+data = read_file(cur_day, "input_to_l.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+@time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 3628
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 3628
+# 2.046 s (280100 allocations: 322.94 MiB)
+@btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "input_to_q.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 3848
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 3848
 # 2.667 s (2581620 allocations: 582.86 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
 
@@ -112,3 +182,12 @@ g, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs = build
 @time astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs) == 2006
 # 41.071 s (212560860 allocations: 11.47 GiB)
 @btime astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
+
+data = read_file(cur_day, "input.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
+g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+@time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 4042
+g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
+@time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 4042 # zatím: 2291
+# 2.046 s (280100 allocations: 322.94 MiB)
+@btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+@btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)

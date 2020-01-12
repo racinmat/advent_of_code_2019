@@ -57,7 +57,6 @@ function build_graph_2(data)
     start_node = 0
     key2node = Dict{Char, Int}()
     door2node = Dict{Char, Int}()
-    door2neighbors = Dict{Char, Vector{Int}}()
     for (i, j) in enumerate(CartesianIndices(data))
         set_prop!(g, i, :coords, j)
     end
@@ -73,7 +72,6 @@ function build_graph_2(data)
         coords = get_prop(g, vertex, :coords)
         if data[coords] == '@'
             start_node = vertex
-            global start_node = vertex
         elseif Int('a') <= Int(data[coords]) <= Int('z')
             key2node[data[coords]] = vertex
         elseif Int('A') <= Int(data[coords]) <= Int('Z')
@@ -85,7 +83,7 @@ function build_graph_2(data)
     num_nodes = 1+length(key2node)+length(door2node)
     # num_nodes = 1+length(key2node)
     small_g = MetaGraph(SimpleGraph(num_nodes), 1.)
-    start_node_new = 1
+    start_node_small = 1
     key2node_small = Dict(key => 1+val for (val, key) in enumerate(keys(key2node)))
     door2node_small = Dict(key => 1+length(key2node)+val for (val, key) in enumerate(keys(door2node)))
     small2g = Dict(1=>start_node)
@@ -100,63 +98,46 @@ function build_graph_2(data)
     end
     # adding start to key and doors edges
     for (small_node, node) in small2g
-        node = collect(values(small2g))[1]
+        # small_node = 1
+        # node = collect(values(small2g))[small_node]
         node2others = dijkstra_shortest_paths(g, node)
         for (small_other, other) in small2g
             if node == other
                 continue
             end
             # check about doors in path
-            other = collect(values(small2g))[2]
-            small_other = 2
+            # small_other = 3
+            # other = collect(values(small2g))[small_other]
             iter = node2others.parents[other]
-            no_doors = true
-            goal_node = other
-            small_goal_node = small_other
-            dist_so_far = 1
+            sth_in_way = false
             while iter != node
-                if iter ∈ values(door2node)
-                    println(first(filter(x->x[2] == iter, door2node)))
-                    global door, door_node = first(filter(x->x[2] == iter, door2node))
-                    global small_door_node = g2small[door_node]
-                    println(door)
-                    global no_doors = false
-
-                    add_edge!(small_g, small_door_node, small_goal_node)
-                    set_prop!(small_g, small_door_node, small_goal_node, :weight, dist_so_far)
-                    println(door, " ", dist_so_far)
-                    global goal_node = door_node
-                    global small_goal_node = small_door_node
+                if iter ∈ keys(g2small) # there are all interesting nodes
+                    sth_in_way = true
+                    break
                 end
-                global iter = node2others.parents[iter]
-                global dist_so_far += 1
+                iter = node2others.parents[iter]
             end
-            println(dist_so_far, ' ', node2others.dists[other])
-
-            if no_doors
+            # println(dist_so_far, ' ', node2others.dists[other])
+            if !sth_in_way
                 add_edge!(small_g, small_node, small_other)
                 set_prop!(small_g, small_node, small_other, :weight, node2others.dists[other])
-                println("start ", node2others.dists[other])
-            else
-                add_edge!(small_g, small_node, small_goal_node)
-                set_prop!(small_g, small_node, small_goal_node, :weight, dist_so_far)
-                println("start ", dist_so_far)
             end
         end
     end
 
     # need to remap vertices, theirs numbering is changed after removal
-    full_graph = copy(g.graph)
+    full_graph = copy(small_g)
 
-    for (letter, node) in door2node
-        neighbors_list = neighbors(g, node) |> collect
+    door2neighbors = Dict{Char, Vector{Int}}()
+    for (letter, node) in door2node_small
+        neighbors_list = neighbors(small_g, node) |> collect
         door2neighbors[letter] = neighbors_list
         for n in neighbors_list
-            rem_edge!(g, node, n)
+            rem_edge!(small_g, node, n)
         end
     end
 
-    g, key2node, door2node, door2neighbors, start_node, full_graph
+    small_g, key2node_small, door2node_small, door2neighbors, start_node_small, full_graph
 end
 
 function build_graph_part_2(data)
@@ -203,7 +184,7 @@ function build_graph_part_2(data)
     gs, key2node, door2node, door2neighbors, start_poses, graph2door, full_gs
 end
 
-DistCache = Dict{Tuple{Set{Char}, Int}, Vector{Int}}  # cache for (have_keys, cur_pos)
+DistCache = Dict{Tuple{Set{Char}, Int}, Vector{<:Real}}  # cache for (have_keys, cur_pos)
 HeurCache = Dict{Vector{Int}, Int}
 GraphCache = Dict{Set{Char}, AbstractGraph}
 NodeRepr = Tuple{Set{Int}, Set{Char}, Int}
@@ -223,6 +204,14 @@ struct SingleNode <: Node
     heur::Int
 end
 
+struct SingleNode2 <: Node
+    taken_keys::Vector{Char}
+    graph::MetaGraph
+    cur_pos::Int
+    dist_so_far::Int
+    heur::Int
+end
+
 struct MultiNode <: Node
     taken_keys::Vector{Char}
     graphs::Vector{SimpleGraph}
@@ -232,6 +221,15 @@ struct MultiNode <: Node
 end
 
 function shortest_paths(node::SingleNode, dist_cache::DistCache)
+    @timeit to "shortest_paths cache key" dist_cache_key = (Set(node.taken_keys), node.cur_pos)
+    if !haskey(dist_cache, dist_cache_key)
+        @timeit to "dijkstra" states = dijkstra_shortest_paths(node.graph, node.cur_pos)
+        @timeit to "copy(states.dists)" dist_cache[dist_cache_key] = copy(states.dists)
+    end
+    dist_cache[dist_cache_key]
+end
+
+function shortest_paths(node::SingleNode2, dist_cache::DistCache)
     @timeit to "shortest_paths cache key" dist_cache_key = (Set(node.taken_keys), node.cur_pos)
     if !haskey(dist_cache, dist_cache_key)
         @timeit to "dijkstra" states = dijkstra_shortest_paths(node.graph, node.cur_pos)
@@ -255,6 +253,11 @@ function shortest_paths(node::MultiNode, dist_cache::DistCache2, door2node, grap
 end
 
 function get_avail_keys(dists::Vector{Int}, node::SingleNode, key2node)
+    let2dist = Dict(letter=>dists[node] for (letter, node) in key2node if dists[node] < typemax(Int))
+    let2dist
+end
+
+function get_avail_keys(dists::Vector{<:Real}, node::SingleNode2, key2node)
     let2dist = Dict(letter=>dists[node] for (letter, node) in key2node if dists[node] < typemax(Int))
     let2dist
 end
@@ -284,6 +287,28 @@ function build_neighbor(node::SingleNode, next_key::Char, dist_traveled, key2nod
     next_graph = graph_cache[cache_key]
     @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_pos, key2node, full_dists, heur_cache)
     SingleNode(next_taken_keys, next_graph, next_pos, node.dist_so_far + dist_traveled, min(h_val, node.heur))
+end
+
+function build_neighbor(node::SingleNode2, next_key::Char, dist_traveled, key2node, door2neighbors, door2node, graph_cache,
+        full_dists, heur_cache)
+    next_pos = key2node[next_key]
+    @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
+    # copying graph is costly, both time and memory-wise
+    push!(next_taken_keys, next_key)
+    cache_key = Set(next_taken_keys)
+    if !haskey(graph_cache, cache_key)
+        @timeit to "copy(node.graph)" next_graph = copy(node.graph)
+        next_door = uppercase(next_key)
+        @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
+            for neighbor in door2neighbors[next_door]
+                add_edge!(next_graph, door2node[next_door], neighbor)
+            end
+        end
+        graph_cache[cache_key] = next_graph
+    end
+    next_graph = graph_cache[cache_key]
+    @timeit to "calc_heuristic" h_val = heuristic!(next_taken_keys, next_pos, key2node, full_dists, heur_cache)
+    SingleNode2(next_taken_keys, next_graph, next_pos, node.dist_so_far + dist_traveled, min(h_val, node.heur))
 end
 
 function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx, key2node, door2neighbors, door2node,
@@ -359,6 +384,13 @@ function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeRepr
     Set(next_pos), Set(next_taken_keys), node.dist_so_far + dist
 end
 
+function make_neighbor_repr(node::SingleNode2, letter, dist, key2node)::NodeRepr
+    next_pos = key2node[letter]
+    next_taken_keys = copy(node.taken_keys)
+    push!(next_taken_keys, letter)
+    Set(next_pos), Set(next_taken_keys), node.dist_so_far + dist
+end
+
 function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::NodeRepr2
     next_pos = key2node[letter][2]
     next_taken_keys = copy(node.taken_keys)
@@ -369,6 +401,20 @@ function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::
 end
 
 function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists,
+        heur_cache, open_configs)
+    @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
+    @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
+    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, door2neighbors,
+        door2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
+    for (letter, neighbor_repr) in neighbor_reprs
+        if neighbor_repr ∉ open_configs
+            push!(open_configs, neighbor_repr)
+        end
+    end
+    neighbors
+end
+
+function get_neighbors(node::SingleNode2, dist_cache, graph_cache, key2node, door2neighbors, door2node, full_dists,
         heur_cache, open_configs)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
@@ -404,6 +450,14 @@ function prepare_neighbors(node::SingleNode, key2node, door2neighbors, door2node
     neighbors, neighbor_reprs
 end
 
+function prepare_neighbors(node::SingleNode2, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
+    @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, key2node) for (letter, dist) in avail_keys)
+    @timeit to "build_neighbor arr" neighbors = [
+        (dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache, full_dists, heur_cache))
+        for (letter, dist) in avail_keys if neighbor_reprs[letter] ∉ open_configs]
+    neighbors, neighbor_reprs
+end
+
 function prepare_neighbors(node::MultiNode, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, heur_cache,
         graph2door, full_dists)
     @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, from_idx, key2node) for (letter, (dist, from_idx)) in avail_keys)
@@ -414,6 +468,10 @@ end
 
 function make_init_node(g, start_pos::Int)
     SingleNode([], copy(g), start_pos, 0, typemax(Int) ÷ 10)
+end
+
+function make_init_node_2(g, start_pos::Int)
+    SingleNode2([], copy(g), start_pos, 0, typemax(Int) ÷ 10)
 end
 
 function make_init_node(g, start_poses::Vector{Int})
@@ -463,7 +521,7 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
-    start_node = make_init_node(g, start_pos)
+    start_node = make_init_node_2(g, start_pos)
     # maximum dist with some multiplicative margin
     @timeit to "init_floyd_warshall" full_dists = floyd_warshall_shortest_paths(full_graph).dists
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
