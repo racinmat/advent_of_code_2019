@@ -118,6 +118,7 @@ g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = bu
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
 @btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
+# todo: I found a bug that same (have keys, cur pos) nodes, but all of them are explored, the longer is not cut
 data = read_file(cur_day, "input_to_i.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
 g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 1696
@@ -191,3 +192,25 @@ g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = bu
 # 2.046 s (280100 allocations: 322.94 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
 @btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
+
+
+
+key2node_2
+door2node_2
+key2node_2['i']
+key2node_2['a']
+key2node_2['a']
+weights(full_graph_2)[key2node_2['i'], 12]
+weights(full_graph_2)[12, 18]
+weights(full_graph_2)[18, 15]
+weights(full_graph_2)[15, 5]
+weights(full_graph_2)[5, 4]
+neighbors(full_graph_2, key2node_2['i'])
+neighbors(full_graph_2, 3)
+neighbors(full_graph_2, 12)
+neighbors(full_graph_2, key2node_2['a'])
+neighbors(full_graph_2, 5)
+neighbors(full_graph_2, 15)
+neighbors(full_graph_2, 18)
+neighbors(full_graph_2, 17)
+dijkstra_shortest_paths(full_graph_2, key2node_2['i']).dists[key2node_2['a']]
