@@ -4,8 +4,8 @@ using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructu
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
-    x->hcat(x...) |> x->permutedims(x, [2, 1])
+# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
 # data =  read_file(cur_day, "test_input_24.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
 #     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
@@ -264,8 +264,8 @@ function get_neighbors(node::SingleNode, dist_cache, graph_cache, key2node, door
         heur_cache, open_configs)
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
-    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, open_configs,
-        avail_keys, graph_cache, full_dists, heur_cache)
+    @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, door2neighbors,
+        door2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
     for (letter, neighbor_repr) in neighbor_reprs
         if neighbor_repr ∉ open_configs
             push!(open_configs, neighbor_repr)
@@ -279,7 +279,7 @@ function get_neighbors(node::MultiNode, dist_cache, graph_cache, key2node, door2
     @timeit to "shortest_paths" dists = shortest_paths(node, dist_cache, door2node, graph2door)
     @timeit to "get_avail_keys" avail_keys = get_avail_keys(dists, node, filter(x->x[1] ∉ node.taken_keys, key2node))
     @timeit to "prepare_neighbors" neighbors, neighbor_reprs = prepare_neighbors(node, key2node, door2neighbors,
-        door2node, open_configs, avail_keys, graph_cache, heur_cache, graph2door, full_dists)
+        door2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, heur_cache, graph2door, full_dists)
     for (letter, neighbor_repr) in neighbor_reprs
         if neighbor_repr ∉ open_configs
             push!(open_configs, neighbor_repr)
@@ -288,7 +288,7 @@ function get_neighbors(node::MultiNode, dist_cache, graph_cache, key2node, door2
     neighbors
 end
 
-function prepare_neighbors(node::SingleNode, key2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
+function prepare_neighbors(node::SingleNode, key2node, door2neighbors, door2node, open_configs, avail_keys, graph_cache, full_dists, heur_cache)
     @timeit to "neighbor_repr" neighbor_reprs = Dict(letter=>make_neighbor_repr(node, letter, dist, key2node) for (letter, dist) in avail_keys)
     @timeit to "build_neighbor arr" neighbors = [
         (dist, build_neighbor(node, letter, dist, key2node, door2neighbors, door2node, graph_cache, full_dists, heur_cache))
@@ -320,7 +320,7 @@ function astar(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, door2
     open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
     start_node = make_init_node(g, start_pos)
     # maximum dist with some multiplicative margin
-    full_dists = floyd_warshall_shortest_paths(full_graph).dists
+    @timeit to "init_floyd_warshall" full_dists = floyd_warshall_shortest_paths(full_graph).dists
     max_val = maximum([i for i in full_dists if i < typemax(Int)])
     max_size = 0
     for i in 1:size(full_dists)[1]
@@ -407,7 +407,7 @@ function part2()
     astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 end
 
-println(part1())
+# println(part1())
 # # submit(part1(), cur_day, 1)
-println(part2())
+# println(part2())
 # # submit(part2(), cur_day, 2)
