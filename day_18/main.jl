@@ -128,14 +128,17 @@ function build_graph_2(data)
     # need to remap vertices, theirs numbering is changed after removal
     full_graph = copy(small_g)
 
-    door2neighbors = Dict{Char, Vector{Int}}()
+    door2neighbors = Dict{Char, Vector{Tuple{Int, Int}}}()
     for (letter, node) in door2node_small
-        neighbors_list = neighbors(small_g, node) |> collect
+        neighbors_list = neighbors(small_g, node) .|> (x->(x, get_prop(small_g, node, x, :weight))) |> collect
         door2neighbors[letter] = neighbors_list
-        for n in neighbors_list
-            # todo: fixnout to, abych v přidávání hran měl u door2neighbors měl hrany u obou doors jejich neighbors jakožto další doors
-            # todo: first build lists, then remove?
-            rem_edge!(small_g, node, n)
+    end
+
+    for (door, neighbors) in door2neighbors
+        for (n, edge_weight) in neighbors
+            if has_edge(small_g, door2node_small[door], n)
+                rem_edge!(small_g, door2node_small[door], n)
+            end
         end
     end
 
@@ -263,7 +266,7 @@ function get_avail_keys(dists::Vector{Int}, key2node)
 end
 
 function get_avail_keys(dists::Vector{<:Real}, key2node)
-    let2dist = Dict(letter=>dists[node] for (letter, node) in key2node if dists[node] < typemax(Int))
+    let2dist = Dict(letter=>dists[node] for (letter, node) in key2node if dists[node] < Inf)
     let2dist
 end
 
@@ -306,9 +309,9 @@ function build_neighbor(node::SingleNode2, next_key::Char, dist_traveled, key2no
         @timeit to "copy(node.graph)" next_graph = copy(node.graph)
         next_door = uppercase(next_key)
         @timeit to "modifying graph" if haskey(door2neighbors, next_door)   # for the last key there is no door
-            for neighbor in door2neighbors[next_door]
-                # todo: here add the weight, so it would work
+            for (neighbor, edge_weight) in door2neighbors[next_door]
                 add_edge!(next_graph, door2node[next_door], neighbor)
+                set_prop!(next_graph, door2node[next_door], neighbor, :weight, edge_weight)
             end
         end
         graph_cache[cache_key] = next_graph
