@@ -144,7 +144,9 @@ function build_graph_2(data)
 
     small_g, key2node_small, door2node_small, door2neighbors, start_node_small, full_graph
 end
-
+# todo: problem is, when I add all edges adjacent to door, some doors get skipped
+#      9 => 18 => 22 => 28 => 12 => 11
+# b => i =>  B =>  G =>  I =>  c =>  a
 function build_graph_part_2(data)
     start_pos = findfirst(x->x=='@', data)
     multi_robot_setting = hcat(['@', '#', '@'], ['#', '#', '#'], ['@', '#', '@'])
@@ -237,10 +239,10 @@ end
 function shortest_paths(node::SingleNode2, dist_cache::DistCache)
     @timeit to "shortest_paths cache key" dist_cache_key = (Set(node.taken_keys), node.cur_pos)
     if !haskey(dist_cache, dist_cache_key)
-        @debug "calculating dists: edges from $(node.cur_pos): $(node.graph.eprops)"
+        # @debug "calculating dists: edges from $(node.cur_pos): $(node.graph.eprops)"
         @timeit to "dijkstra" states = dijkstra_shortest_paths(node.graph, node.cur_pos)
-        @debug "calculated dists: dists: $(states.dists)"
-        @debug "calculated dists: parents: $(states.parents)"
+        # @debug "calculated dists: dists: $(states.dists)"
+        # @debug "calculated dists: parents: $(states.parents)"
         @timeit to "copy(states.dists)" dist_cache[dist_cache_key] = copy(states.dists)
     end
     dist_cache[dist_cache_key]
