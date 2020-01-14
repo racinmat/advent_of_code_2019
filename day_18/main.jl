@@ -377,16 +377,15 @@ end
 
 # based on minimal spanning tree
 function heuristic!(taken_keys::Vector{Char}, cur_pos::Int, key2node, full_dists, heur_cache)
-    # @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
-    # isempty(nodes_to_go) && return 0
-    # @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
-    # if !haskey(heur_cache, nodes_to_go)
-    #     @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
-    #     @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
-    #     heur_cache[nodes_to_go] = mst_sum
-    # end
-    # heur_cache[nodes_to_go]
-    0
+    @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
+    isempty(nodes_to_go) && return 0
+    @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
+    if !haskey(heur_cache, nodes_to_go)
+        @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
+        @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
+        heur_cache[nodes_to_go] = mst_sum
+    end
+    heur_cache[nodes_to_go]
 end
 
 # based on minimal spanning tree
@@ -586,11 +585,13 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
         for (dist, neighbor) in node_neighbors
             neighbor_repr = neighbor_reprs[neighbor.taken_keys[end]]
             if haskey(open_configs, neighbor_repr)
-                # @info "hit same point for $(neighbor.taken_keys |> join), old dist so far $(open_configs[neighbor_repr]), new dist so far $(neighbor.dist_so_far), new heur: $(neighbor.heur)"
+                @debug "hit same point for $(neighbor.taken_keys |> join), old dist so far $(open_configs[neighbor_repr]), new dist so far $(neighbor.dist_so_far), new heur: $(neighbor.heur)"
                 if neighbor.dist_so_far < open_configs[neighbor_repr][1]   # if I got here cheaper than original
                     old_repr_with_dist = neighbor_repr[1], neighbor_repr[2], sum(open_configs[neighbor_repr])
                     old_node = repr_with_dist2node[old_repr_with_dist]
-                    delete!(open_nodes, old_node)    # heur is same, using it as key
+                    if haskey(open_nodes, old_node)     # sometimes duplicated node was already visited because of the heuristics
+                        delete!(open_nodes, old_node)    # heur is same, using it as key
+                    end
                 else    # else skipping this node
                     continue
                 end
