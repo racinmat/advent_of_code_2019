@@ -151,6 +151,7 @@ function build_graph_2(data)
             door_far_edges[door] = []
             for (node, e_weight) in neighbours
                 if node ∈ seen_nodes
+                    # todo: some letters are not added at all, figure out why, e.g. B in input_to_j
                     println("edge $(node2str[door_node]) - $(node2str[node]) inside")
                     push!(door_near_edges[door], (node, e_weight))
                 else
