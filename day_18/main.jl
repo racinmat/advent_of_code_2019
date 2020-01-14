@@ -98,16 +98,11 @@ function build_graph_2(data)
     end
     # adding start to key and doors edges
     for (small_node, node) in small2g
-        # small_node = 1
-        # node = collect(values(small2g))[small_node]
         node2others = dijkstra_shortest_paths(g, node)
         for (small_other, other) in small2g
             if node == other
                 continue
             end
-            # check about doors in path
-            # small_other = 3
-            # other = collect(values(small2g))[small_other]
             iter = node2others.parents[other]
             sth_in_way = false
             while iter != node
@@ -131,103 +126,132 @@ function build_graph_2(data)
     # for each door, I will be manipulating only those edges that are "behind" that door, by testing adjacency of neighbors
     door2neighbors = Dict{Char, Vector{Tuple{Int, Int}}}()
     for (letter, node) in door2node_small
-        neighbors_list = neighbors(small_g, node) .|> (x->(x, get_prop(small_g, node, x, :weight))) |> collect
+        neighbors_list = neighbors(full_graph, node) .|> (x->(x, get_prop(full_graph, node, x, :weight))) |> collect
         door2neighbors[letter] = neighbors_list
     end
 
-    for (door, neighbors) in door2neighbors
-        for (n, edge_weight) in neighbors
-            if has_edge(small_g, door2node_small[door], n)
-                rem_edge!(small_g, door2node_small[door], n)
+    node2str = Dict(1=>"start")
+    for (letter, node) in key2node_small
+        node2str[node] = string(letter)
+    end
+    for (letter, node) in door2node_small
+        node2str[node] = string(letter)
+    end
+
+    door_near_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
+    door_far_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
+    seen_nodes = Set([1])
+    while length(seen_nodes) < nv(full_graph)
+        seen_nodes = union(seen_nodes, Set([neighbors(full_graph, i) for i in seen_nodes] |> Iterators.flatten |> collect))
+        in_frontier = setdiff(Set([neighbors(full_graph, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
+        for (door, neighbours) in door2neighbors
+            door_node = door2node_small[door]
+            door_node ∉ in_frontier && continue
+            door_near_edges[door] = []
+            door_far_edges[door] = []
+            for (node, e_weight) in neighbours
+                if node ∈ seen_nodes
+                    println("edge $(node2str[door_node]) - $(node2str[node]) inside")
+                    push!(door_near_edges[door], (node, e_weight))
+                else
+                    println("edge $(node2str[door_node]) - $(node2str[node]) outside")
+                    push!(door_far_edges[door], (node, e_weight))
+                end
             end
         end
     end
 
-    small_g, key2node_small, door2node_small, door2neighbors, start_node_small, full_graph
-end
-
-
-# for each door, I will be manipulating only those edges that are "behind" that door, by testing adjacency of neighbors
-small_g = copy(full_graph_2)
-door2neighbors = Dict{Char, Vector{Tuple{Int, Int}}}()
-door2node_small = door2node_2
-key2node_small = key2node_2
-for (letter, node) in door2node_small
-    neighbors_list = neighbors(small_g, node) .|> (x->(x, get_prop(small_g, node, x, :weight))) |> collect
-    door2neighbors[letter] = neighbors_list
-end
-door2neighbors
-
-door_near_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
-door_far_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
-
-seen_nodes = Set([1])
-seen_nodes = union(seen_nodes, Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect))
-
-# doors_found = [door for (door, node) in door2node_small]
-# door = doors_found[1]
-door = door2neighbors['A']
-
-node2str = Dict(1=>"start")
-for (letter, node) in key2node_small
-    node2str[node] = string(letter)
-end
-for (letter, node) in door2node_small
-    node2str[node] = string(letter)
-end
-node2str
-
-in_frontier = setdiff(Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
-[node2str[x] for x in seen_nodes]
-[node2str[x] for x in in_frontier]
-
-for (door, neighbours) in door2neighbors
-    door_node = door2node_small[door]
-    door_node ∉ in_frontier && continue
-    door_near_edges[door] = []
-    door_far_edges[door] = []
-    for (node, e_weight) in neighbours
-        if node ∈ seen_nodes
-            println("edge $(node2str[door_node]) - $(node2str[node]) inside")
-            push!(door_near_edges[door], (door_node, node))
-        else
-            println("edge $(node2str[door_node]) - $(node2str[node]) outside")
-            push!(door_far_edges[door], (door_node, node))
-        end
-    end
-end
-
-seen_nodes = union(seen_nodes, Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect))
-in_frontier = setdiff(Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
-[node2str[x] for x in seen_nodes]
-[node2str[x] for x in in_frontier]
-
-for (door, neighbours) in door2neighbors
-    door_node = door2node_small[door]
-    door_node ∉ in_frontier && continue
-    door_near_edges[door] = []
-    door_far_edges[door] = []
-    for (node, e_weight) in neighbours
-        if node ∈ seen_nodes
-            println("edge $(node2str[door_node]) - $(node2str[node]) inside")
-            push!(door_near_edges[door], (door_node, node))
-        else
-            println("edge $(node2str[door_node]) - $(node2str[node]) outside")
-            push!(door_far_edges[door], (door_node, node))
-        end
-    end
-end
-
-# todo: iterovat tohle všechno dookola, dokud není vše v seen_nodes
-
-
-for (door, neighbors) in door2neighbors
-    for (n, edge_weight) in neighbors
-        if has_edge(small_g, door2node_small[door], n)
+    for (door, neighbors) in door_far_edges
+        for (n, edge_weight) in neighbors
             rem_edge!(small_g, door2node_small[door], n)
         end
     end
+
+    small_g, key2node_small, door2node_small, door_far_edges, start_node_small, full_graph
 end
+
+#
+# # for each door, I will be manipulating only those edges that are "behind" that door, by testing adjacency of neighbors
+# small_g = copy(full_graph_2)
+# door2neighbors = Dict{Char, Vector{Tuple{Int, Int}}}()
+# door2node_small = door2node_2
+# key2node_small = key2node_2
+# for (letter, node) in door2node_small
+#     neighbors_list = neighbors(small_g, node) .|> (x->(x, get_prop(small_g, node, x, :weight))) |> collect
+#     door2neighbors[letter] = neighbors_list
+# end
+# door2neighbors
+#
+# # doors_found = [door for (door, node) in door2node_small]
+# # door = doors_found[1]
+# door = door2neighbors['A']
+#
+# node2str = Dict(1=>"start")
+# for (letter, node) in key2node_small
+#     node2str[node] = string(letter)
+# end
+# for (letter, node) in door2node_small
+#     node2str[node] = string(letter)
+# end
+# node2str
+#
+# door_near_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
+# door_far_edges = Dict{Char, Vector{Tuple{Int, Int}}}()
+#
+# seen_nodes = Set([1])
+# seen_nodes = union(seen_nodes, Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect))
+#
+# in_frontier = setdiff(Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
+# [node2str[x] for x in seen_nodes]
+# [node2str[x] for x in in_frontier]
+#
+# for (door, neighbours) in door2neighbors
+#     door_node = door2node_small[door]
+#     door_node ∉ in_frontier && continue
+#     door_near_edges[door] = []
+#     door_far_edges[door] = []
+#     for (node, e_weight) in neighbours
+#         if node ∈ seen_nodes
+#             println("edge $(node2str[door_node]) - $(node2str[node]) inside")
+#             push!(door_near_edges[door], (door_node, node))
+#         else
+#             println("edge $(node2str[door_node]) - $(node2str[node]) outside")
+#             push!(door_far_edges[door], (door_node, node))
+#         end
+#     end
+# end
+#
+# seen_nodes = union(seen_nodes, Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect))
+# in_frontier = setdiff(Set([neighbors(small_g, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
+# [node2str[x] for x in seen_nodes]
+# [node2str[x] for x in in_frontier]
+#
+# for (door, neighbours) in door2neighbors
+#     door_node = door2node_small[door]
+#     door_node ∉ in_frontier && continue
+#     door_near_edges[door] = []
+#     door_far_edges[door] = []
+#     for (node, e_weight) in neighbours
+#         if node ∈ seen_nodes
+#             println("edge $(node2str[door_node]) - $(node2str[node]) inside")
+#             push!(door_near_edges[door], (door_node, node))
+#         else
+#             println("edge $(node2str[door_node]) - $(node2str[node]) outside")
+#             push!(door_far_edges[door], (door_node, node))
+#         end
+#     end
+# end
+#
+# # todo: iterovat tohle všechno dookola, dokud není vše v seen_nodes
+#
+#
+# for (door, neighbors) in door2neighbors
+#     for (n, edge_weight) in neighbors
+#         if has_edge(small_g, door2node_small[door], n)
+#             rem_edge!(small_g, door2node_small[door], n)
+#         end
+#     end
+# end
 
 # todo: problem is, when I add all edges adjacent to door, some doors get skipped
 #      9 => 18 => 22 => 28 => 12 => 11
