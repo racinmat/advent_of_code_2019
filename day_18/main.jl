@@ -216,8 +216,8 @@ end
 DistCache = Dict{Tuple{Set{Char}, Int}, Vector{<:Real}}  # cache for (have_keys, cur_pos)
 HeurCache = Dict{Vector{Int}, Int}
 GraphCache = Dict{Set{Char}, AbstractGraph}
-NodeReprWithDist = Tuple{Set{Int}, Set{Char}, Int}
-NodeRepr = Tuple{Set{Int}, Set{Char}}
+NodeReprWithDist = Tuple{Int, Set{Char}, Int}
+NodeRepr = Tuple{Int, Set{Char}}
 
 DistCache2 = Dict{Tuple{Int, Set{Char}, Int}, Vector{Int}}  # cache for (graph_num, have_keys, cur_pos)
 GraphCache2 = Dict{Tuple{Int, Set{Char}}, AbstractGraph}
@@ -415,14 +415,14 @@ function make_neighbor_repr(node::SingleNode, letter, dist, key2node)::NodeReprW
     next_pos = key2node[letter]
     next_taken_keys = copy(node.taken_keys)
     push!(next_taken_keys, letter)
-    Set(next_pos), Set(next_taken_keys), node.dist_so_far + dist
+    next_pos, Set(next_taken_keys), node.dist_so_far + dist
 end
 
 function make_neighbor_repr(node::SingleNode2, letter, dist, key2node)::Tuple{NodeReprWithDist, NodeRepr}
     next_pos = key2node[letter]
     next_taken_keys = copy(node.taken_keys)
     push!(next_taken_keys, letter)
-    (Set(next_pos), Set(next_taken_keys), node.dist_so_far + dist), (Set(next_pos), Set(next_taken_keys))
+    (next_pos, Set(next_taken_keys), node.dist_so_far + dist), (next_pos, Set(next_taken_keys))
 end
 
 function make_neighbor_repr(node::MultiNode, letter, dist, from_idx, key2node)::NodeRepr2
@@ -558,7 +558,8 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs_with_dist = Set{NodeReprWithDist}()  # set of tuples (position, set of taken keys, dist)
-    open_configs = Dict{NodeRepr, Int}()  # set of tuples (position, set of taken keys, dist)
+    open_configs = Dict{NodeRepr, Tuple{Int, Int}}()  # set of tuples (position, set of taken keys, dist)
+    repr_with_dist2node = Dict{NodeReprWithDist, Node}()
     start_node = make_init_node_2(g, start_pos)
     # maximum dist with some multiplicative margin
     @timeit to "init_floyd_warshall" full_dists = floyd_warshall_shortest_paths(full_graph).dists
@@ -585,17 +586,20 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
         for (dist, neighbor) in node_neighbors
             neighbor_repr = neighbor_reprs[neighbor.taken_keys[end]]
             if haskey(open_configs, neighbor_repr)
-                @info "hit same point for $(neighbor.taken_keys |> join), old dist so far $(open_configs[neighbor_repr]), new dist so far $(neighbor.dist_so_far), new heur: $(neighbor.heur)"
-                if neighbor.dist_so_far < open_configs[neighbor_repr]   # if I got here cheaper than original
-                    delete!(open_nodes, open_configs[neighbor_repr] + neighbor.heur)    # heur is same, using it as key
+                # @info "hit same point for $(neighbor.taken_keys |> join), old dist so far $(open_configs[neighbor_repr]), new dist so far $(neighbor.dist_so_far), new heur: $(neighbor.heur)"
+                if neighbor.dist_so_far < open_configs[neighbor_repr][1]   # if I got here cheaper than original
+                    old_repr_with_dist = neighbor_repr[1], neighbor_repr[2], sum(open_configs[neighbor_repr])
+                    old_node = repr_with_dist2node[old_repr_with_dist]
+                    delete!(open_nodes, old_node)    # heur is same, using it as key
                 else    # else skipping this node
                     continue
                 end
             end
             f = neighbor.dist_so_far + neighbor.heur
-            open_configs[neighbor_repr] = neighbor.dist_so_far
+            open_configs[neighbor_repr] = neighbor.dist_so_far, neighbor.heur
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
             @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
+            repr_with_dist2node[neighbor_repr[1], neighbor_repr[2], f] = neighbor
         end
     end
 end

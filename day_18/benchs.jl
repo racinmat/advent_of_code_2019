@@ -109,6 +109,7 @@ g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = bu
 @time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 136
 # 10.355 s (44466044 allocations: 2.60 GiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
+# 4.986 s (18345195 allocations: 1.00 GiB)
 @btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "input_to_d.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
@@ -167,9 +168,9 @@ g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 3656
 g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
 @time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 3656
-# 2.005 s (919923 allocations: 417.43 MiB)
+# 2.877 s (2616988 allocations: 577.06 MiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
-# 169.934 ms (879667 allocations: 52.68 MiB)
+# 54.462 ms (281233 allocations: 18.78 MiB)
 @btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "input_to_o.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
@@ -215,7 +216,7 @@ g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = bu
 @time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 4042
 # 150.099 s (364478501 allocations: 25.58 GiB)
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
-# 87.757 s (355501363 allocations: 21.88 GiB)
+# 25.15 s (355501363 allocations: 5.09 GiB)
 @btime astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2)
 
 data = read_file(cur_day, "test_input_24.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
