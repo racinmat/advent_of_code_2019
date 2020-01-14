@@ -30,7 +30,7 @@ display(to)
 
 #testing
 data = read_file(cur_day, "test_input_44.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_poses, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 44
 g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
 @time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 44
@@ -210,7 +210,7 @@ g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = bu
 @btime astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph)
 
 data = read_file(cur_day, "input.txt") |> x->split(x, '\n') .|> collect |> x->hcat(x...) |> x->permutedims(x, [2, 1])
-g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
+g, key2node, door2node, door2neighbors, start_poses, full_graph = build_graph(data)
 @time astar(g, start_poses[1], key2node, door2neighbors, door2node, full_graph) == 4042
 g_2, key2node_2, door2node_2, door2neighbors_2, start_poses_2, full_graph_2 = build_graph_2(data)
 @time astar_2(g_2, start_poses_2[1], key2node_2, door2neighbors_2, door2node_2, full_graph_2) == 4042
