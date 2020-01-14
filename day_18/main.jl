@@ -377,15 +377,16 @@ end
 
 # based on minimal spanning tree
 function heuristic!(taken_keys::Vector{Char}, cur_pos::Int, key2node, full_dists, heur_cache)
-    @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
-    isempty(nodes_to_go) && return 0
-    @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
-    if !haskey(heur_cache, nodes_to_go)
-        @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
-        @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
-        heur_cache[nodes_to_go] = mst_sum
-    end
-    heur_cache[nodes_to_go]
+    # @timeit to "nodes_to_go" nodes_to_go = [j for (i, j) in key2node if i ∉ taken_keys]
+    # isempty(nodes_to_go) && return 0
+    # @timeit to "push! nodes_to_go" push!(nodes_to_go, cur_pos)
+    # if !haskey(heur_cache, nodes_to_go)
+    #     @timeit to "obtain key_dists" keys_dists = full_dists[nodes_to_go, nodes_to_go]
+    #     @timeit to "kruskal mst sum" mst_sum = kruskal_mst(SimpleWeightedGraph(keys_dists)) .|> (x->x.weight) |> sum
+    #     heur_cache[nodes_to_go] = mst_sum
+    # end
+    # heur_cache[nodes_to_go]
+    0
 end
 
 # based on minimal spanning tree
@@ -557,7 +558,7 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
     graph_cache = GraphCache()
     open_nodes = PriorityQueue{Node, Int}()
     open_configs_with_dist = Set{NodeReprWithDist}()  # set of tuples (position, set of taken keys, dist)
-    open_configs = Set{NodeRepr}()  # set of tuples (position, set of taken keys, dist)
+    open_configs = Dict{NodeRepr, Int}()  # set of tuples (position, set of taken keys, dist)
     start_node = make_init_node_2(g, start_pos)
     # maximum dist with some multiplicative margin
     @timeit to "init_floyd_warshall" full_dists = floyd_warshall_shortest_paths(full_graph).dists
@@ -583,11 +584,16 @@ function astar_2(g::AbstractGraph, start_pos::Int, key2node, door2neighbors, doo
             door2neighbors, door2node, full_dists, heur_cache, open_configs_with_dist)
         for (dist, neighbor) in node_neighbors
             neighbor_repr = neighbor_reprs[neighbor.taken_keys[end]]
-            if neighbor_repr ∈ open_configs
-                @info "hit same point"
+            if haskey(open_configs, neighbor_repr)
+                @info "hit same point for $(neighbor.taken_keys |> join), old dist so far $(open_configs[neighbor_repr]), new dist so far $(neighbor.dist_so_far), new heur: $(neighbor.heur)"
+                if neighbor.dist_so_far < open_configs[neighbor_repr]   # if I got here cheaper than original
+                    delete!(open_nodes, open_configs[neighbor_repr] + neighbor.heur)    # heur is same, using it as key
+                else    # else skipping this node
+                    continue
+                end
             end
             f = neighbor.dist_so_far + neighbor.heur
-            push!(open_configs, neighbor_repr)
+            open_configs[neighbor_repr] = neighbor.dist_so_far
             @debug "enqueing node: $(neighbor.taken_keys |> join) with dist_so_far: $(neighbor.dist_so_far |> join) and h: $(neighbor.heur)"
             @timeit to "enqueue" enqueue!(open_nodes, neighbor, f)
         end
