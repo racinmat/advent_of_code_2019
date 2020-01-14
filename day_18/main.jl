@@ -143,19 +143,17 @@ function build_graph_2(data)
     seen_nodes = Set([1])
     while length(seen_nodes) < nv(full_graph)
         seen_nodes = union(seen_nodes, Set([neighbors(full_graph, i) for i in seen_nodes] |> Iterators.flatten |> collect))
-        in_frontier = setdiff(Set([neighbors(full_graph, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
+        # in_frontier = setdiff(Set([neighbors(full_graph, i) for i in seen_nodes] |> Iterators.flatten |> collect), seen_nodes)
         for (door, neighbours) in door2neighbors
             door_node = door2node_small[door]
-            door_node ∉ in_frontier && continue
+            door_node ∉ seen_nodes && continue
+            door ∈ keys(door_far_edges) && continue
             door_near_edges[door] = []
             door_far_edges[door] = []
             for (node, e_weight) in neighbours
                 if node ∈ seen_nodes
-                    # todo: some letters are not added at all, figure out why, e.g. B in input_to_j
-                    println("edge $(node2str[door_node]) - $(node2str[node]) inside")
                     push!(door_near_edges[door], (node, e_weight))
                 else
-                    println("edge $(node2str[door_node]) - $(node2str[node]) outside")
                     push!(door_far_edges[door], (node, e_weight))
                 end
             end
