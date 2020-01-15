@@ -4,16 +4,16 @@ using LightGraphs, MetaGraphs
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
+# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
+data = cur_day |> test_input |> x->split(x, '\n') .|> collect |>
     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
 function build_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
     g = MetaGraph(g)
-    start_node = 0
-    key2node = Dict{Char, Int}()
-    door2node = Dict{Char, Int}()
-    door2neighbors = Dict{Char, Vector{Int}}()
+    letter2node = Dict{Char, Int}()
+    portal2node = Dict{String, Int}()
     for (i, j) in enumerate(CartesianIndices(data))
         set_prop!(g, i, :coords, j)
         # todo: put here the property of teleport and then squish letters together
@@ -28,14 +28,28 @@ function build_graph(data)
 
     for vertex in vertices(g)
         coords = get_prop(g, vertex, :coords)
-        if data[coords] == '@'
-            start_node = vertex
-        elseif Int('a') <= Int(data[coords]) <= Int('z')
-            key2node[data[coords]] = vertex
-        elseif Int('A') <= Int(data[coords]) <= Int('Z')
-            door2node[data[coords]] = vertex
+        if Int('A') <= Int(data[coords]) <= Int('Z')
+            letter2node[data[coords]] = vertex
         end
     end
+
+    [(letter, neighbors(g, vertex)) for (letter, vertex) in letter2node]
+    [(letter, get_prop(g, v, :coords), data[get_prop(g, v, :coords)]) for (letter, vertex) in letter2node  for v in neighbors(g, vertex)]
+    [(letter, degree(g, vertex)) for (letter, vertex) in letter2node]
+    for (letter, vertex) in letter2node
+        degree(g, vertex) != 1 && continue
+        v_coords = get_prop(g, vertex, :coords)
+        other_v = first(neighbors(g, vertex))
+        other_v_coords = get_prop(g, other_v, :coords)
+        other_letter = data[other_v_coords]
+        if sum(Tuple(v_coords)) < sum(Tuple(other_v_coords))
+            portal = letter * other_letter
+        else
+            portal = letter * other_letter
+        end
+        portal2node[portal] = vertex
+    end
+
     # need to remap vertices, theirs numbering is changed after removal
     full_graph = copy(g.graph)
 
