@@ -263,7 +263,7 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
     @timeit to "copy(node.taken_keys)" next_taken_keys = copy(node.taken_keys)
     # copying graph is costly, both time and memory-wise
     push!(next_taken_keys, next_key)
-    next_graphs = Vector{SimpleGraph}(undef, length(node.graphs))
+    next_graphs = Vector{MetaGraph}(undef, length(node.graphs))
     for (i, graph) in enumerate(node.graphs)
         cache_key = (i, Set(key for key in next_taken_keys if uppercase(key) ∈ graph2door[i]))
         if !haskey(graph_cache, cache_key)
@@ -273,8 +273,9 @@ function build_neighbor(node::MultiNode, next_key::Char, dist_traveled, from_idx
                 next_door_part, next_door_neighbors = door2neighbors[next_door]
                 door_node = door2node[next_door]
                 for (neighbor, edge_weight) in next_door_neighbors
+                    @debug neighbor, edge_weight
                     add_edge!(next_graph, door_node[2], neighbor)
-                    set_prop!(next_graph, door2node[2], neighbor, :weight, edge_weight)
+                    set_prop!(next_graph, door_node[2], neighbor, :weight, edge_weight)
                 end
             end
             graph_cache[cache_key] = next_graph
@@ -517,7 +518,7 @@ function astar(gs::Vector{<:AbstractGraph}, start_poses::Vector{Int}, key2node, 
             verbose && println("$(Dates.now()): max solution len: $cur_node_len")
             max_size = cur_node_len
         end
-        @timeit to "get_neighbors" node_neighbors = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
+        @timeit to "get_neighbors" node_neighbors, neighbor_reprs = get_neighbors(cur_node, dist_cache, graph_cache, key2node,
             door2neighbors, door2node, heur_cache, open_configs_with_dist, graph2door, full_dists)
         for (dist, neighbor) in node_neighbors
             neighbor_repr = neighbor_reprs[neighbor.taken_keys[end]]
@@ -554,7 +555,7 @@ my_debug_logger = ConsoleLogger(base_stream, Logging.Debug, meta_formatter=simpl
 using BenchmarkTools
 to = TimerOutput()
 verbose = true
-verbose = false
+# verbose = false
 
 function part1()
     g, key2node, door2node, door2neighbors, start_poses, vprops, full_graph = build_graph(data)
@@ -566,7 +567,7 @@ function part2()
     astar(g, start_poses, key2node, door2neighbors, door2node, graph2door, full_gs)
 end
 
-# println(part1())
-# # submit(part1(), cur_day, 1)
-# println(part2())
-# # submit(part2(), cur_day, 2)
+println(part1())
+# submit(part1(), cur_day, 1)
+println(part2())
+# submit(part2(), cur_day, 2)
