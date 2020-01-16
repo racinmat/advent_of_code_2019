@@ -6,8 +6,10 @@ include(projectdir("misc.jl"))
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
 data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
     x->hcat(x...) |> x->permutedims(x, [2, 1])
-data = cur_day |> test_input |> x->replace(x, "\r" => "") |> x->split(x, '\n') .|> collect |>
-    x->hcat(x...) |> x->permutedims(x, [2, 1])
+# data = cur_day |> test_input |> x->replace(x, "\r" => "") |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
+# data = read_file(cur_day, "test_input_small.txt") |> x->replace(x, "\r" => "") |> x->split(x, '\n') .|> collect |>
+#     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
 function build_base_graph(data)
     g = LightGraphs.SimpleGraphs.grid(data |> size |> collect)
@@ -119,25 +121,23 @@ function build_graph_part_2(data)
             set_prop!(large_g, src_node, dst_node, :weight, get_prop(small_g, edge, :weight))
         end
     end
-
-    thr = round(middle[1]/2)
-    # todo: refactor this to the condition
-    [(portal, sum(abs.(Tuple(get_prop(small_g, node1, :coords)-middle))) < thr, sum(abs.(Tuple(get_prop(small_g, node2, :coords)-middle))) < thr) for (portal, (node1, node2)) in portal2nodes_small]
+    
+    thr = (Tuple(middle)./2).+4
     for level in 1:max_floors-1
         for (portal, (node1, node2)) in portal2nodes_small
             level_in = (level-1)*small_g_len
             level_out = level*small_g_len
-            in1 = sum(abs.(Tuple(get_prop(small_g, node1, :coords)-middle))) < thr
-            in2 = sum(abs.(Tuple(get_prop(small_g, node2, :coords)-middle))) < thr
-            in1 == in2 && @assert "same side, wtf"
+            in1 = minimum(abs.(Tuple(get_prop(small_g, node1, :coords)-middle)) .< thr)
+            in2 = minimum(abs.(Tuple(get_prop(small_g, node2, :coords)-middle)) .< thr)
+            @assert in1 != in2 "same side, wtf, $in1, $in2, $node1, $node2, $(get_prop(small_g, node1, :coords)), $(get_prop(small_g, node2, :coords)), $(Tuple(get_prop(small_g, node1, :coords)-middle)), $(Tuple(get_prop(small_g, node2, :coords)-middle))"
             level_1 = in1 ? level_in : level_out
             level_2 = in2 ? level_in : level_out
-            add_edge!(small_g, node1 + level_1, node2 + level_2)
-            add_edge!(small_g, node2 + level_1, node1 + level_2)
+            add_edge!(large_g, node1 + level_1, node2 + level_2)
+            add_edge!(large_g, node2 + level_2, node1 + level_1)
         end
     end
 
-    small_g, start_node_small, goal_node_small
+    large_g, start_node_small, goal_node_small
 end
 
 function part1()
@@ -146,7 +146,8 @@ function part1()
 end
 
 function part2()
-    data
+    g, start_node, goal_node = build_graph_part_2(data)
+    Int(dijkstra_shortest_paths(g, start_node).dists[goal_node])
 end
 
 using BenchmarkTools
