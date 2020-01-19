@@ -6,38 +6,29 @@ include(projectdir("misc.jl"))
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
 data = cur_day |> read_input |> x->split(x, '\n')
 
-function cut_deck!(deck, i)
-    if i > 0
-        deck[1:end-i], deck[end-i+1:end] = deck[i+1:end], deck[1:i]
-    else
-        deck[1:-i], deck[-i+1:end] = deck[end+i+1:end], deck[1:end+i]
-    end
-    deck
+cut_deck(card::Int, arr_len, i) = mod(card - i, arr_len)
+deal_new_stack(card::Int, arr_len) = arr_len - card - 1
+deal_increment(card::Int, arr_len, i) = mod(card * i, arr_len)
+process_instruction(card::Int, arr_len, i::CutInstruction) = mod(card - i.i, arr_len)
+process_instruction(card::Int, arr_len, i::DealNewInstruction) = arr_len - card - 1
+process_instruction(card::Int, arr_len, i::DealIncrementInstruction) = mod(card * i.i, arr_len)
+
+abstract type Instruction end
+struct CutInstruction <: Instruction
+    i::Int
+end
+struct DealNewInstruction <: Instruction end
+struct DealIncrementInstruction <: Instruction
+    i::Int
 end
 
-function deal_new_stack!(deck)
-    reverse!(deck)
-end
-
-function deal_increment!(deck, i)
-    temp_deck = copy(deck)
-    deck_len = length(deck)
-    iter = 1
-    for num in temp_deck
-        deck[iter] = num
-        iter += i
-        iter = iter > deck_len ? iter % deck_len : iter
-    end
-    deck
-end
-
-function process_instruction!(deck, row)
+function parse_instruction(row)
     if match(r"cut -?\d+", row) != nothing
-        @timeit to "cut_deck" return cut_deck!(deck, parse(Int, match(r"cut (-?\d+)", row)[1]))
+        return CutInstruction(parse(Int, match(r"cut (-?\d+)", row)[1]))
     elseif match(r"deal into new stack", row) != nothing
-        @timeit to "deal_new_stack" return deal_new_stack!(deck)
+        return DealNewInstruction()
     elseif match(r"deal with increment \d+", row) != nothing
-        @timeit to "deal_increment" return deal_increment!(deck, parse(Int, match(r"deal with increment (\d+)", row)[1]))
+        return DealIncrementInstruction(parse(Int, match(r"deal with increment (\d+)", row)[1]))
     else
         println("unknown")
     end
@@ -51,6 +42,14 @@ function part1()
     findfirst(x->x==2019, deck)-1
 end
 
+function part12()
+    card = 2019
+    for row in data
+        card = process_instruction(card, 10007, row)
+    end
+    card
+end
+
 function part11()
     deck = collect(0:10006)
     for i in 1:1000
@@ -59,6 +58,17 @@ function part11()
         end
     end
     findfirst(x->x==2019, deck)-1
+end
+
+function part112()
+    card = 2019
+    instructions = parse_instruction.(data)
+    for i in 1:1000
+        for row in instructions
+            card = process_instruction(card, 10007, row)
+        end
+    end
+    card
 end
 
 function part2()
@@ -74,14 +84,23 @@ end
 using BenchmarkTools
 
 to = TimerOutput()
-println(part1())
+part1()
 display(to)
 
 to = TimerOutput()
-println(part11())
+part12()
+display(to)
+
+to = TimerOutput()
+part11()
+display(to)
+
+to = TimerOutput()
+part112()
 display(to)
 
 @btime part1()
+@btime part12()
 submit(part1(), cur_day, 1)
 println(part2())
 submit(part2(), cur_day, 2)
