@@ -121,7 +121,7 @@ function build_graph_part_2(data)
             set_prop!(large_g, src_node, dst_node, :weight, get_prop(small_g, edge, :weight))
         end
     end
-    
+
     thr = (Tuple(middle)./2).+4
     for level in 1:max_floors-1
         for (portal, (node1, node2)) in portal2nodes_small
@@ -155,4 +155,5 @@ println(part1())
 @btime part1()
 submit(part1(), cur_day, 1)
 println(part2())
+@btime part2()
 submit(part2(), cur_day, 2)
