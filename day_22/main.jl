@@ -23,45 +23,28 @@ process_instruction_rev(card::Signed, arr_len, i::CutInstruction) = mod(card + i
 process_instruction_rev(card::Signed, arr_len, i::DealNewInstruction) = arr_len - card - 1
 process_instruction_rev(card::Signed, arr_len, i::DealIncrementInstruction) = mod(invmod(i.i, arr_len) * card, arr_len)
 
+inst2params(arr_len, i::CutInstruction) = ModuloParams(1, -i.i)
+inst2params(arr_len, i::DealNewInstruction) = ModuloParams(-1, -1)
+inst2params(arr_len, i::DealIncrementInstruction) = ModuloParams(i.i, 0)
+
+inst2params_rev(arr_len, i::CutInstruction) = ModuloParams(1, i.i)
+inst2params_rev(arr_len, i::DealNewInstruction) = ModuloParams(-1, -1)
+inst2params_rev(arr_len, i::DealIncrementInstruction) = ModuloParams(invmod(i.i, arr_len), 0)
+
 struct ModuloParams <: Instruction
     a::Signed
     b::Signed
 end
 
 process_instruction(card::Signed, arr_len, i::ModuloParams) = mod(i.a * card + i.b, arr_len)
+merge_ops(m1, m2, arr_len) = ModuloParams(mod(m1.a*m2.a, arr_len), mod(m1.b*m2.a+m2.b, arr_len))
 
-function merge_instructions(x, arr_len, instructions::Vector{Instruction})
-    y = x
-    println("x: $x, y: $y")
+function merge_instructions(arr_len, instructions::Vector{ModuloParams})
+    merged = ModuloParams(1, 0)
     for row in instructions
-        y = process_instruction(y, arr_len, row)
+        merged = merge_ops(merged, row, arr_len)
     end
-    z = y
-    println("x: $x, y: $y, z: $z")
-    for row in instructions
-        z = process_instruction(z, arr_len, row)
-    end
-    println("x: $x, y: $y, z: $z")
-    a = mod((y - z) * invmod(x - y, arr_len), arr_len)
-    b = mod(y - a * x, arr_len)
-    ModuloParams(a, b)
-end
-
-function merge_instructions_rev(x, arr_len, instructions::Vector{Instruction})
-    y = x
-    println("x: $x, y: $y")
-    for row in instructions
-        y = process_instruction_rev(y, arr_len, row)
-    end
-    z = y
-    println("x: $x, y: $y, z: $z")
-    for row in instructions
-        z = process_instruction_rev(z, arr_len, row)
-    end
-    println("x: $x, y: $y, z: $z")
-    a = mod((y - z) * invmod(x - y, arr_len), arr_len)
-    b = mod(y - a * x, arr_len)
-    ModuloParams(a, b)
+    merged
 end
 
 function parse_instruction(row)
@@ -85,71 +68,27 @@ function part1()
     card
 end
 
-function part12()
-    card = 2_019
-    instructions = parse_instruction.(data)
-    instruction = merge_instructions(card, 10_007, instructions)
-    process_instruction(card, 10_007, instruction)
-end
-
 function part2()
-    card = 2_020
-    instructions = reverse(parse_instruction.(data))
-    for i in 1:101_741_582_076_661
-        for row in instructions
-            card = process_instruction_rev(card, 119_315_717_514_047, row)
-        end
-    end
-    card
-end
-
-function part2()
-    instructions = reverse(parse_instruction.(data))
-    # card = 2_020
-    card = 6978
-    # for i in 1:101_741_582_076_661
-    # for i in 1:76_661
-        for row in instructions
-            # card = process_instruction_rev(card, 119_315_717_514_047, row)
-            # card = process_instruction_rev(card, 119_315_71, row)
-            card = process_instruction_rev(card, 10_007, row)
-        end
-    # end
-    card
-end
-
-function part21()
-    instructions = reverse(parse_instruction.(data))
-    # card = 2_020
-    card = 6978
-    # arr_size = 119_315_717_514_047
+    arr_size = 119_315_717_514_047
     # arr_size = 119_315_71
-    arr_size = 10_007
-    instruction = merge_instructions_rev(card, arr_size, instructions)
-    # for i in 1:101_741_582_076_661
+    # arr_size = 10_007
+    instructions = reverse(parse_instruction.(data))
+    modulo_params = inst2params_rev.(arr_size, instructions)
     card = 2_020
-    card = process_instruction(card, arr_size, instruction)
-    # for i in 1:76_661
-    #     card = process_instruction(card, 119_315_717_514_047, instruction)
-    # end
+    instruction = merge_instructions(arr_size, modulo_params)
+    n_inter = 101_741_582_076_661
+    # n_inter = 82_076_661
+    pm = powermod(instruction.a, n_inter, arr_size)
+    c = mod(mod(pm - 1, arr_size) * invmod(instruction.a - 1, arr_size), arr_size)
+    card = mod(pm * card + instruction.b * c, arr_size)
     card
 end
 
 using BenchmarkTools
 
-to = TimerOutput()
-part1()
-part12()
-display(to)
-
-to = TimerOutput()
-part2()
-part21()
-display(to)
-
+println(part1())
 @btime part1()
-@btime part2()
-@btime part21()
-submit(part1(), cur_day, 1)
+# submit(part1(), cur_day, 1)
 println(part2())
-submit(part2(), cur_day, 2)
+@btime part2()
+# submit(part2(), cur_day, 2)
