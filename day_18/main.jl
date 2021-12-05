@@ -4,8 +4,8 @@ using LightGraphs, Combinatorics, TimerOutputs, MetaGraphs, Logging, DataStructu
 include(projectdir("misc.jl"))
 
 cur_day = parse(Int, splitdir(@__DIR__)[end][5:end])
-# data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
-#     x->hcat(x...) |> x->permutedims(x, [2, 1])
+data = cur_day |> read_input |> x->split(x, '\n') .|> collect |>
+    x->hcat(x...) |> x->permutedims(x, [2, 1])
 # data =  read_file(cur_day, "test_input_24.txt") |> x->rstrip(x, '\n') |> x->split(x, '\n') .|> collect |>
 #     x->hcat(x...) |> x->permutedims(x, [2, 1])
 
